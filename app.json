@@ -1,15 +1,29 @@
 {
   "expo": {
-    "name": "Blinkit Audit",
-    "slug": "blinkit-audit",
+    "name": "Blinkit_Audit",
+    "slug": "Blinkit_Audit",
     "version": "1.0.0",
     "orientation": "portrait",
-    "backgroundColor": "#0f0f0f",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
     "android": {
-      "package": "com.blinkitaudit.app",
       "adaptiveIcon": {
-        "backgroundColor": "#F8C300"
-      }
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     }
   }
 }
