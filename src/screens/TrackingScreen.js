@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppContext } from '../context/AppContext';
+import { Image, ScrollView } from 'react-native';
 
 export default function TrackingScreen({ navigation }) {
-  const { currentUser, simulatePostPaymentOOC, markOrderDelivered, buyAgain } = useAppContext();
+  const { currentUser, simulatePostPaymentOOC, markOrderDelivered, buyAgain, addTipToOrder } = useAppContext();
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [isRefunding, setIsRefunding] = useState(false);
 
@@ -94,15 +95,61 @@ export default function TrackingScreen({ navigation }) {
         />
       </View>
 
+      <ScrollView showsVerticalScrollIndicator={false}>
       {selectedOrder && (
         <View style={styles.detailsSection}>
+          {selectedOrder.status !== 'Delivered' && (
+            <View style={styles.mapContainer}>
+              <View style={styles.mapHeader}>
+                <Text style={styles.mapHeaderTextSmall}>Packing your order</Text>
+                <Text style={styles.mapHeaderTextLarge}>Arriving in 5 minutes</Text>
+              </View>
+              <Image source={{ uri: 'https://placehold.co/400x200/e0e0e0/666666/png?text=Map+Tracking+Route' }} style={styles.mapImage} />
+              
+              <View style={styles.payCard}>
+                <Text style={styles.payTitle}>Pay ₹{selectedOrder.revisedTotal || selectedOrder.originalTotal} before or on delivery</Text>
+                <Text style={styles.paySub}>Please keep change handy or avoid hassle by paying online.</Text>
+              </View>
+
+              <View style={styles.partnerCard}>
+                <Text style={styles.partnerName}>I'm RAMESHWAR, your delivery partner</Text>
+                <Text style={styles.partnerStatus}>I've reached the store and will pick up your order soon</Text>
+              </View>
+
+              <View style={styles.tipCard}>
+                <Text style={styles.tipTitle}>Delivering happiness at your doorstep!</Text>
+                <Text style={styles.tipSub}>Thank them by leaving a tip</Text>
+                <View style={styles.tipRow}>
+                  <TouchableOpacity 
+                    style={[styles.tipBtn, selectedOrder.tipAmount === 20 && styles.tipBtnActive]} 
+                    onPress={() => addTipToOrder(selectedOrderId, 20)}>
+                    <Text style={[styles.tipBtnText, selectedOrder.tipAmount === 20 && styles.tipBtnTextActive]}>🤩 ₹20</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.tipBtn, selectedOrder.tipAmount === 30 && styles.tipBtnActive]} 
+                    onPress={() => addTipToOrder(selectedOrderId, 30)}>
+                    <Text style={[styles.tipBtnText, selectedOrder.tipAmount === 30 && styles.tipBtnTextActive]}>🤩 ₹30</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.tipBtn, selectedOrder.tipAmount === 50 && styles.tipBtnActive]} 
+                    onPress={() => addTipToOrder(selectedOrderId, 50)}>
+                    <Text style={[styles.tipBtnText, selectedOrder.tipAmount === 50 && styles.tipBtnTextActive]}>🤩 ₹50</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          )}
+
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Order Info</Text>
             <Text style={styles.infoText}>Status: <Text style={styles.bold}>{selectedOrder.status}</Text></Text>
             <Text style={styles.infoText}>Payment: {selectedOrder.paymentMethod}</Text>
             <Text style={styles.infoText}>Original Total: ₹{selectedOrder.originalTotal}</Text>
+            {selectedOrder.tipAmount > 0 && (
+              <Text style={styles.infoText}>Delivery Tip: ₹{selectedOrder.tipAmount}</Text>
+            )}
             {selectedOrder.revisedTotal && (
-              <Text style={styles.infoTextRevised}>Revised Total: ₹{selectedOrder.revisedTotal}</Text>
+              <Text style={styles.infoTextRevised}>Final Total: ₹{selectedOrder.revisedTotal}</Text>
             )}
             
             <View style={styles.divider} />
@@ -149,6 +196,7 @@ export default function TrackingScreen({ navigation }) {
           )}
         </View>
       )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -334,6 +382,109 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#1C8A3B',
+  },
+  mapContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  mapHeader: {
+    backgroundColor: '#1C8A3B',
+    padding: 15,
+    alignItems: 'center',
+  },
+  mapHeaderTextSmall: {
+    color: '#e8f5e9',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  mapHeaderTextLarge: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  mapImage: {
+    width: '100%',
+    height: 180,
+    resizeMode: 'cover',
+  },
+  payCard: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+  },
+  payTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#111',
+    marginBottom: 4,
+  },
+  paySub: {
+    fontSize: 12,
+    color: '#666',
+  },
+  partnerCard: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+    backgroundColor: '#fdfdfd',
+  },
+  partnerName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 6,
+  },
+  partnerStatus: {
+    fontSize: 12,
+    color: '#1C8A3B',
+    fontWeight: '600',
+    backgroundColor: '#e8f5e9',
+    padding: 8,
+    borderRadius: 6,
+  },
+  tipCard: {
+    padding: 15,
+  },
+  tipTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#111',
+  },
+  tipSub: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 10,
+  },
+  tipRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  tipBtn: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+  },
+  tipBtnActive: {
+    borderColor: '#1C8A3B',
+    backgroundColor: '#e8f5e9',
+  },
+  tipBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#333',
+  },
+  tipBtnTextActive: {
     color: '#1C8A3B',
   }
 });

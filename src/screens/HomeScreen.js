@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, TextInput, ScrollView, Modal } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppContext } from '../context/AppContext';
 
@@ -9,17 +9,17 @@ export default function HomeScreen({ navigation }) {
   const isDark = theme === 'dark';
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
 
   const categories = [
-    { id: '1', name: '🥦 Vegetables' },
-    { id: '2', name: '🥛 Dairy & Bread' },
-    { id: '3', name: '🍪 Snacks' },
-    { id: '4', name: '🥤 Beverages' },
-    { id: '5', name: '🍬 Sweets' },
-    { id: '6', name: '🧹 Cleaning' },
-    { id: '7', name: '💊 Healthcare' },
+    { id: '1', name: 'Vegetables', icon: '🥦' },
+    { id: '2', name: 'Dairy & Bread', icon: '🥛' },
+    { id: '3', name: 'Snacks', icon: '🍪' },
+    { id: '4', name: 'Beverages', icon: '🥤' },
+    { id: '5', name: 'Sweets', icon: '🍬' },
+    { id: '6', name: 'Cleaning', icon: '🧹' },
+    { id: '7', name: 'Healthcare', icon: '💊' },
+    { id: '8', name: 'Personal Care', icon: '🧴' },
   ];
 
   const handleAddToCart = (product) => {
@@ -30,18 +30,17 @@ export default function HomeScreen({ navigation }) {
     addToCart(product);
   };
 
-  const renderProduct = ({ item }) => {
-    // Use LIVE stock from context, not the stale item.stock
+  const renderProduct = ({ item, isHorizontal }) => {
     const liveStock = stock.find(s => s.id === item.id);
     const isOutOfStock = !liveStock || liveStock.stock <= 0;
 
     return (
       <TouchableOpacity
-        style={styles.productCard}
+        style={[styles.productCard, isDark && styles.cardDark, isHorizontal && { width: '100%' }]}
         onPress={() => navigation.navigate('Product', { productId: item.id })}
         activeOpacity={0.85}
       >
-        <View style={styles.imageContainer}>
+        <View style={[styles.imageContainer, isDark && styles.bgDarkLine]}>
           <Image source={{ uri: item.image }} style={styles.productImage} />
         </View>
         <View style={styles.deliveryBadge}>
@@ -75,10 +74,19 @@ export default function HomeScreen({ navigation }) {
   };
 
   const cartCount = currentUser ? currentUser.cart.reduce((sum, item) => sum + item.cartQuantity, 0) : 0;
+  
+  // Best Sellers (first 9 items)
+  const bestSellers = stock.slice(0, 9);
 
-  const displayStock = stock.filter(item => {
-    if (selectedCategory && item.categoryId !== selectedCategory) return false;
-    return true;
+  // Buy Again & Review items
+  const deliveredOrders = currentUser?.orders?.filter(o => o.status === 'Delivered') || [];
+  let pastItems = [];
+  deliveredOrders.forEach(order => {
+    order.items.forEach(item => {
+      if (!pastItems.find(p => p.id === item.id)) {
+        pastItems.push(item);
+      }
+    });
   });
 
   const searchResults = searchQuery.trim().length > 0
@@ -96,14 +104,22 @@ export default function HomeScreen({ navigation }) {
               📍 {currentUser ? `${currentUser.address.building}, ${currentUser.address.city}` : 'Select your location ▾'}
             </Text>
           </View>
-          <TouchableOpacity
-            style={styles.profileBtn}
-            onPress={() => navigation.navigate(currentUser ? 'Profile' : 'Login')}
-          >
-            <Text style={styles.profileBtnText}>
-              {currentUser ? currentUser.name.charAt(0) : '👤'}
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity
+              style={styles.ordersBtn}
+              onPress={() => navigation.navigate(currentUser ? 'Tracking' : 'Login')}
+            >
+              <Text style={styles.ordersBtnText}>📦</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.profileBtn}
+              onPress={() => navigation.navigate(currentUser ? 'Profile' : 'Login')}
+            >
+              <Text style={styles.profileBtnText}>
+                {currentUser ? currentUser.name.charAt(0) : '👤'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={styles.searchBar}>
           <Text style={styles.searchIcon}>🔍</Text>
@@ -144,62 +160,94 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-        {/* Banner (Hidden in Essential Mode) */}
+        {/* Banner */}
         {!isEssentialMode && (
           <View style={styles.bannerContainer}>
             <View style={styles.bannerCard}>
               <View style={styles.bannerContent}>
                 <Text style={styles.bannerTitle}>Get 20% off</Text>
                 <Text style={styles.bannerSub}>on your first order!</Text>
-                <View style={styles.bannerBtn}>
+                <TouchableOpacity 
+                  style={styles.bannerBtn}
+                  onPress={() => navigation.navigate('AllItems')}
+                >
                   <Text style={styles.bannerBtnText}>Order Now</Text>
-                </View>
+                </TouchableOpacity>
               </View>
               <Text style={styles.bannerEmoji}>🛒</Text>
             </View>
           </View>
         )}
 
-        {/* Categories */}
+        {/* 3x3 Best Sellers Grid */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Shop by Category</Text>
+          <Text style={[styles.sectionTitle, isDark && styles.textLight]}>🔥 Bestsellers</Text>
+          <FlatList
+            data={bestSellers}
+            renderItem={renderProduct}
+            keyExtractor={item => item.id}
+            numColumns={3}
+            scrollEnabled={false}
+            columnWrapperStyle={styles.row}
+          />
+          <TouchableOpacity 
+            style={styles.seeAllBtn}
+            onPress={() => navigation.navigate('AllItems')}
+          >
+            <Text style={styles.seeAllBtnText}>See All Items →</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Shop by Categories (Horizontal Scroll) */}
+        <View style={styles.sectionContainer}>
+          <Text style={[styles.sectionTitle, isDark && styles.textLight]}>Shop by Category</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity 
-              style={[styles.categoryBadge, selectedCategory === null && styles.categoryBadgeActive]} 
-              activeOpacity={0.7}
-              onPress={() => setSelectedCategory(null)}
-            >
-              <Text style={[styles.categoryText, selectedCategory === null && styles.categoryTextActive]}>All</Text>
-            </TouchableOpacity>
             {categories.map(cat => (
               <TouchableOpacity 
                 key={cat.id} 
-                style={[styles.categoryBadge, selectedCategory === cat.id && styles.categoryBadgeActive]} 
-                activeOpacity={0.7}
-                onPress={() => setSelectedCategory(cat.id)}
+                style={[styles.categoryCard, isDark && styles.cardDark]} 
+                onPress={() => navigation.navigate('AllItems', { categoryId: cat.id })}
               >
-                <Text style={[styles.categoryText, selectedCategory === cat.id && styles.categoryTextActive]}>{cat.name}</Text>
+                <Text style={styles.categoryCardIcon}>{cat.icon}</Text>
+                <Text style={[styles.categoryCardText, isDark && styles.textLight]}>{cat.name}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
 
-        {/* Product Grid */}
-        <View style={styles.sectionContainer}>
-          <Text style={[styles.sectionTitle, isDark && styles.textLight]}>{selectedCategory ? 'Products' : '🔥 Bestsellers'}</Text>
-          {displayStock.length === 0 ? (
-            <Text style={{ textAlign: 'center', marginTop: 20, color: '#666' }}>No products found in this category.</Text>
-          ) : (
-            <FlatList
-              data={displayStock}
-              renderItem={renderProduct}
-              keyExtractor={item => item.id}
-              numColumns={3}
-              scrollEnabled={false}
-              columnWrapperStyle={styles.row}
-            />
-          )}
-        </View>
+        {/* Buy Again Section */}
+        {pastItems.length > 0 && (
+          <View style={styles.sectionContainer}>
+            <Text style={[styles.sectionTitle, isDark && styles.textLight]}>Buy Again</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {pastItems.map(item => (
+                <View key={item.id} style={{ width: 130, marginRight: 10 }}>
+                  {renderProduct({ item: stock.find(s => s.id === item.id) || item, isHorizontal: true })}
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
+        {/* Review Items Section */}
+        {pastItems.length > 0 && (
+          <View style={styles.sectionContainer}>
+            <Text style={[styles.sectionTitle, isDark && styles.textLight]}>Review your past purchases</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {pastItems.map(item => (
+                <TouchableOpacity 
+                  key={`rev-${item.id}`} 
+                  style={[styles.reviewItemCard, isDark && styles.cardDark]}
+                  onPress={() => navigation.navigate('Product', { productId: item.id, isReviewMode: true })}
+                >
+                  <Image source={{ uri: item.image }} style={styles.reviewItemImage} />
+                  <Text style={[styles.reviewItemName, isDark && styles.textLight]} numberOfLines={1}>{item.name}</Text>
+                  <Text style={styles.reviewItemAction}>Tap to rate ⭐</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
       </ScrollView>
 
       {/* Floating Cart Button */}
@@ -255,6 +303,25 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginTop: 2,
   },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ordersBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  ordersBtnText: {
+    fontSize: 18,
+  },
   profileBtn: {
     width: 40,
     height: 40,
@@ -296,7 +363,7 @@ const styles = StyleSheet.create({
   },
   searchResultsContainer: {
     position: 'absolute',
-    top: 100, // Below the header
+    top: 100,
     left: 15,
     right: 15,
     backgroundColor: '#fff',
@@ -376,36 +443,77 @@ const styles = StyleSheet.create({
   sectionContainer: {
     paddingHorizontal: 12,
     paddingTop: 8,
-    paddingBottom: 4,
+    paddingBottom: 12,
   },
   sectionTitle: {
     fontSize: 17,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 12,
     color: '#111',
   },
-  categoryBadge: {
+  seeAllBtn: {
+    backgroundColor: '#e8f5e9',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  seeAllBtnText: {
+    color: '#1C8A3B',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  categoryCard: {
     backgroundColor: '#fff',
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 20,
-    marginRight: 8,
-    marginBottom: 10,
+    borderRadius: 12,
+    padding: 15,
+    marginRight: 10,
+    alignItems: 'center',
+    width: 100,
     shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
   },
-  categoryBadgeActive: {
-    backgroundColor: '#1C8A3B',
+  categoryCardIcon: {
+    fontSize: 32,
+    marginBottom: 8,
   },
-  categoryText: {
-    fontSize: 13,
+  categoryCardText: {
+    fontSize: 12,
     fontWeight: '600',
+    textAlign: 'center',
     color: '#333',
   },
-  categoryTextActive: {
-    color: '#fff',
+  reviewItemCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 10,
+    marginRight: 10,
+    width: 120,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  reviewItemImage: {
+    width: 60,
+    height: 60,
+    resizeMode: 'contain',
+    marginBottom: 8,
+  },
+  reviewItemName: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  reviewItemAction: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#F8CB46',
   },
   row: {
     justifyContent: 'flex-start',
@@ -422,6 +530,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.07,
     shadowRadius: 5,
     elevation: 2,
+  },
+  cardDark: {
+    backgroundColor: '#1e1e1e',
+  },
+  bgDarkLine: {
+    backgroundColor: '#1e1e1e',
+    borderColor: '#333',
   },
   imageContainer: {
     alignItems: 'center',
@@ -497,6 +612,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 6,
     paddingVertical: 4,
+    width: '100%',
   },
   outOfStockText: {
     color: '#d32f2f',

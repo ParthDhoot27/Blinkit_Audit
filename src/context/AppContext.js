@@ -236,6 +236,23 @@ export const AppProvider = ({ children }) => {
     setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
   };
 
+  const addTipToOrder = (orderId, tipAmount) => {
+    if (!currentUser) return;
+    const updatedOrders = currentUser.orders.map(order => {
+      if (order.id === orderId) {
+        const currentTip = order.tipAmount || 0;
+        const baseTotal = order.revisedTotal || order.originalTotal;
+        // Calculate new total by removing old tip and adding new tip
+        const newTotal = baseTotal - currentTip + tipAmount;
+        return { ...order, tipAmount, revisedTotal: newTotal };
+      }
+      return order;
+    });
+    const updatedUser = { ...currentUser, orders: updatedOrders };
+    setCurrentUser(updatedUser);
+    setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+  };
+
   return (
     <AppContext.Provider value={{
       stock,
@@ -251,6 +268,7 @@ export const AppProvider = ({ children }) => {
       buyAgain,
       simulatePostPaymentOOC,
       markOrderDelivered,
+      addTipToOrder,
       productReviews,
       submitReview,
       isEssentialMode,

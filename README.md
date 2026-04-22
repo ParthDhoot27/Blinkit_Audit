@@ -6,8 +6,10 @@ A robust, pixel-perfect clone of the Blinkit app built with React Native and Exp
 
 ### 1. Robust Data & UI Refinements
 - **Extensive Catalog**: The `stock.json` now includes 50 categorized items (Vegetables, Dairy, Snacks, Beverages, Sweets, Cleaning, Healthcare, Personal Care) with high-quality imagery.
-- **Dynamic Pricing**: Many items now feature original prices with a strikethrough, simulating real-world discounts.
-- **3-Column Layout**: Redesigned the Home screen product catalogue to feature a dense, scrollable 3-column grid for better discovery.
+- **Global Ratings**: Every item now has a base rating and review count, simulating a lively ecosystem.
+- **Dynamic Pricing**: Many items feature original prices with a strikethrough, simulating real-world discounts.
+- **Home Screen Redesign**: The Home screen is completely revamped to focus on 9 bestsellers (3x3 grid), a new scrolling Category section, and customized sections for reordering and reviewing items.
+- **All Items Browser**: Added a dedicated `AllItemsScreen` featuring a split layout with a scrollable left sidebar for categories and a right-side grid for products, closely mirroring real-world quick commerce apps.
 - **Notch Handling**: Fully integrated `react-native-safe-area-context` to properly manage UI overlap with the mobile notch and camera cutouts on all devices.
 - **Dynamic Search**: An interactive search bar that provides real-time, drop-down suggestions and allows instant navigation to products.
 - **Functional Categories**: The "Shop by Category" badges on the Home screen now act as functional filters for the product grid below.
@@ -29,9 +31,9 @@ The app features a dynamic real-time inventory simulator (inventory randomly dro
 - **Dark Mode Preview**: A new "Dark Mode" toggle in the profile settings switches the app's global theme context, applying a dark background to the Profile and Home screens.
 - **Parallel Ordering**: The context state now supports holding multiple active orders simultaneously.
 - **Tracking Screen**: A dedicated tracking page where users can toggle between their active and past orders via a horizontal scroll tab. All previous orders are visible here.
-- **Buy Again**: Past orders that have been "Delivered" feature a **Buy Again** button that instantly adds all available items back to the active cart.
+- **Buy Again (Home & Tracking)**: Past orders that have been "Delivered" are extracted to the Home screen for quick reordering. There's also a **Buy Again** button in the Tracking screen that instantly adds all available items back to the active cart.
 - **Simulations**: The Tracking Screen allows users to manually trigger Post-Payment OOC events or "Simulate Delivery" events for active orders.
-- **Interactive Review System**: Once an order is delivered, users can review items. The Product details page has been upgraded to support an interactive 5-star rating system and text review form. Submitted reviews are saved globally and displayed on the product page along with the aggregate average rating.
+- **Interactive Review System**: Once an order is delivered, users can review items directly from the Home screen or Tracking screen. The Product details page has been upgraded to support an interactive 5-star rating system and text review form. Submitted reviews are saved globally and factored into the product's average rating.
 
 ## 🛠 Tech Stack
 - React Native

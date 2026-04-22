@@ -21,10 +21,14 @@ export default function ProductScreen({ route, navigation }) {
   const currentStockItem = stock.find(s => s.id === product.id);
   const isOutOfStock = currentStockItem && currentStockItem.stock <= 0;
   
-  // Calculate reviews
+  // Calculate reviews using base stats from stock.json
+  const baseRating = product.rating || 0;
+  const baseCount = product.reviewCount || 0;
   const thisProductReviews = productReviews.filter(r => r.productId === product.id);
-  const avgRating = thisProductReviews.length > 0 
-    ? (thisProductReviews.reduce((sum, r) => sum + r.rating, 0) / thisProductReviews.length).toFixed(1)
+  const totalReviews = baseCount + thisProductReviews.length;
+  
+  const avgRating = totalReviews > 0 
+    ? ((baseRating * baseCount + thisProductReviews.reduce((sum, r) => sum + r.rating, 0)) / totalReviews).toFixed(1)
     : null;
 
   const handleAddToCart = () => {
@@ -60,7 +64,7 @@ export default function ProductScreen({ route, navigation }) {
           {avgRating && (
             <View style={styles.avgRatingRow}>
               <Star size={16} color="#F8CB46" fill="#F8CB46" />
-              <Text style={styles.avgRatingText}>{avgRating} ({thisProductReviews.length} reviews)</Text>
+              <Text style={styles.avgRatingText}>{avgRating} ({totalReviews} reviews)</Text>
             </View>
           )}
 

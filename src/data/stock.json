@@ -5,22 +5,26 @@
     "price": 27,
     "originalPrice": 30,
     "quantity": "500 ml",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/1c0db977-31ab-4d8e-abf3-d42e4a4b4632.jpg",
+    "image": "https://placehold.co/400x400/png?text=Amul%2BTaaza%2BToned",
     "stock": 50,
     "isCold": true,
     "isFragile": false,
-    "categoryId": "2"
+    "categoryId": "2",
+    "rating": 3.6,
+    "reviewCount": 50
   },
   {
     "id": "p2",
     "name": "Nandini GoodLife UHT Treated Milk",
     "price": 29,
     "quantity": "500 ml",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/105118a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Nandini%2BGoodLife%2BUHT",
     "stock": 100,
     "isCold": true,
     "isFragile": false,
-    "categoryId": "2"
+    "categoryId": "2",
+    "rating": 4.9,
+    "reviewCount": 234
   },
   {
     "id": "p3",
@@ -28,22 +32,26 @@
     "price": 100,
     "originalPrice": 120,
     "quantity": "1 kg",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/11883a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Britannia%2BNutriChoice%2BDigestive",
     "stock": 20,
     "isCold": false,
     "isFragile": true,
-    "categoryId": "3"
+    "categoryId": "3",
+    "rating": 4.6,
+    "reviewCount": 19
   },
   {
     "id": "p4",
     "name": "Mother Dairy Classic Dahi",
     "price": 35,
     "quantity": "400 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/5eea3f8a-9861-4148-be22-921eb52dae95.jpg",
+    "image": "https://placehold.co/400x400/png?text=Mother%2BDairy%2BClassic",
     "stock": 15,
     "isCold": true,
     "isFragile": false,
-    "categoryId": "2"
+    "categoryId": "2",
+    "rating": 3.6,
+    "reviewCount": 492
   },
   {
     "id": "p5",
@@ -51,11 +59,13 @@
     "price": 140,
     "originalPrice": 160,
     "quantity": "1 L",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/23555a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Fortune%2BSunlite%2BRefined",
     "stock": 5,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "2"
+    "categoryId": "2",
+    "rating": 4.8,
+    "reviewCount": 78
   },
   {
     "id": "p6",
@@ -63,11 +73,13 @@
     "price": 289,
     "originalPrice": 350,
     "quantity": "200 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/442194a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Farmley%2BPremium%2BCalifornia",
     "stock": 3,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "3"
+    "categoryId": "3",
+    "rating": 4.8,
+    "reviewCount": 162
   },
   {
     "id": "p7",
@@ -75,22 +87,26 @@
     "price": 40,
     "originalPrice": 50,
     "quantity": "1 kg",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10534a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Fresh%2BOnion",
     "stock": 100,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "1"
+    "categoryId": "1",
+    "rating": 3.9,
+    "reviewCount": 110
   },
   {
     "id": "p8",
     "name": "Fresh Potato",
     "price": 30,
     "quantity": "1 kg",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10515a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Fresh%2BPotato",
     "stock": 100,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "1"
+    "categoryId": "1",
+    "rating": 3.7,
+    "reviewCount": 200
   },
   {
     "id": "p9",
@@ -98,44 +114,52 @@
     "price": 50,
     "originalPrice": 60,
     "quantity": "500 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10518a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Hybrid%2BTomato",
     "stock": 50,
     "isCold": true,
     "isFragile": true,
-    "categoryId": "1"
+    "categoryId": "1",
+    "rating": 4.6,
+    "reviewCount": 282
   },
   {
     "id": "p10",
     "name": "Fresh Coriander Leaves",
     "price": 15,
     "quantity": "100 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10492a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Fresh%2BCoriander%2BLeaves",
     "stock": 30,
     "isCold": true,
     "isFragile": true,
-    "categoryId": "1"
+    "categoryId": "1",
+    "rating": 3.9,
+    "reviewCount": 134
   },
   {
     "id": "p11",
     "name": "Harvest Gold White Bread",
     "price": 40,
     "quantity": "400 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/127111a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Harvest%2BGold%2BWhite",
     "stock": 40,
     "isCold": false,
     "isFragile": true,
-    "categoryId": "2"
+    "categoryId": "2",
+    "rating": 4.4,
+    "reviewCount": 475
   },
   {
     "id": "p12",
     "name": "Amul Butter Pasteurized",
     "price": 58,
     "quantity": "100 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/160a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Amul%2BButter%2BPasteurized",
     "stock": 60,
     "isCold": true,
     "isFragile": false,
-    "categoryId": "2"
+    "categoryId": "2",
+    "rating": 4.4,
+    "reviewCount": 492
   },
   {
     "id": "p13",
@@ -143,77 +167,91 @@
     "price": 85,
     "originalPrice": 100,
     "quantity": "200 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/126938a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Mother%2BDairy%2BPaneer",
     "stock": 25,
     "isCold": true,
     "isFragile": true,
-    "categoryId": "2"
+    "categoryId": "2",
+    "rating": 4.3,
+    "reviewCount": 329
   },
   {
     "id": "p14",
     "name": "Lay's India's Magic Masala",
     "price": 20,
     "quantity": "50 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/12204a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Lay's%2BIndia's%2BMagic",
     "stock": 100,
     "isCold": false,
     "isFragile": true,
-    "categoryId": "3"
+    "categoryId": "3",
+    "rating": 4.2,
+    "reviewCount": 31
   },
   {
     "id": "p15",
     "name": "Kurkure Masala Munch",
     "price": 20,
     "quantity": "90 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/11883a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Kurkure%2BMasala%2BMunch",
     "stock": 80,
     "isCold": false,
     "isFragile": true,
-    "categoryId": "3"
+    "categoryId": "3",
+    "rating": 4.3,
+    "reviewCount": 119
   },
   {
     "id": "p16",
     "name": "Haldiram's Bhujia Sev",
     "price": 105,
     "quantity": "400 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/148a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Haldiram's%2BBhujia%2BSev",
     "stock": 40,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "3"
+    "categoryId": "3",
+    "rating": 3.7,
+    "reviewCount": 472
   },
   {
     "id": "p17",
     "name": "Doritos Nacho Cheese",
     "price": 50,
     "quantity": "80 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/433890a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Doritos%2BNacho%2BCheese",
     "stock": 35,
     "isCold": false,
     "isFragile": true,
-    "categoryId": "3"
+    "categoryId": "3",
+    "rating": 3.5,
+    "reviewCount": 114
   },
   {
     "id": "p18",
     "name": "Coca-Cola Original",
     "price": 40,
     "quantity": "750 ml",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/12716a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Coca-Cola%2BOriginal",
     "stock": 60,
     "isCold": true,
     "isFragile": false,
-    "categoryId": "4"
+    "categoryId": "4",
+    "rating": 4.7,
+    "reviewCount": 64
   },
   {
     "id": "p19",
     "name": "Sprite Lime Flavored",
     "price": 40,
     "quantity": "750 ml",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/12717a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Sprite%2BLime%2BFlavored",
     "stock": 65,
     "isCold": true,
     "isFragile": false,
-    "categoryId": "4"
+    "categoryId": "4",
+    "rating": 4.6,
+    "reviewCount": 49
   },
   {
     "id": "p20",
@@ -221,33 +259,39 @@
     "price": 125,
     "originalPrice": 150,
     "quantity": "250 ml",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/11440a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Red%2BBull%2BEnergy",
     "stock": 20,
     "isCold": true,
     "isFragile": false,
-    "categoryId": "4"
+    "categoryId": "4",
+    "rating": 4.7,
+    "reviewCount": 391
   },
   {
     "id": "p21",
     "name": "Maaza Mango Drink",
     "price": 35,
     "quantity": "600 ml",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/11400a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Maaza%2BMango%2BDrink",
     "stock": 50,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "4"
+    "categoryId": "4",
+    "rating": 4.8,
+    "reviewCount": 190
   },
   {
     "id": "p22",
     "name": "Nescafe Cold Coffee",
     "price": 35,
     "quantity": "180 ml",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/483699a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Nescafe%2BCold%2BCoffee",
     "stock": 30,
     "isCold": true,
     "isFragile": false,
-    "categoryId": "4"
+    "categoryId": "4",
+    "rating": 3.6,
+    "reviewCount": 14
   },
   {
     "id": "p23",
@@ -255,33 +299,39 @@
     "price": 85,
     "originalPrice": 100,
     "quantity": "60 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/12530a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Cadbury%2BDairy%2BMilk",
     "stock": 45,
     "isCold": true,
     "isFragile": false,
-    "categoryId": "5"
+    "categoryId": "5",
+    "rating": 4.4,
+    "reviewCount": 402
   },
   {
     "id": "p24",
     "name": "Snickers Peanut Chocolate",
     "price": 50,
     "quantity": "45 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/12554a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Snickers%2BPeanut%2BChocolate",
     "stock": 50,
     "isCold": true,
     "isFragile": false,
-    "categoryId": "5"
+    "categoryId": "5",
+    "rating": 4.4,
+    "reviewCount": 380
   },
   {
     "id": "p25",
     "name": "Nestle KitKat",
     "price": 25,
     "quantity": "38.5 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/12556a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Nestle%2BKitKat",
     "stock": 60,
     "isCold": true,
     "isFragile": false,
-    "categoryId": "5"
+    "categoryId": "5",
+    "rating": 3.9,
+    "reviewCount": 46
   },
   {
     "id": "p26",
@@ -289,11 +339,13 @@
     "price": 250,
     "originalPrice": 300,
     "quantity": "250 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/108398a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Haldiram's%2BKaju%2BKatli",
     "stock": 15,
     "isCold": false,
     "isFragile": true,
-    "categoryId": "5"
+    "categoryId": "5",
+    "rating": 3.7,
+    "reviewCount": 144
   },
   {
     "id": "p27",
@@ -301,22 +353,26 @@
     "price": 130,
     "originalPrice": 150,
     "quantity": "1 kg",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/12028a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Surf%2BExcel%2BEasy",
     "stock": 40,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "6"
+    "categoryId": "6",
+    "rating": 4.1,
+    "reviewCount": 108
   },
   {
     "id": "p28",
     "name": "Vim Dishwash Bar",
     "price": 25,
     "quantity": "200 g",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/12048a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Vim%2BDishwash%2BBar",
     "stock": 80,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "6"
+    "categoryId": "6",
+    "rating": 4.8,
+    "reviewCount": 118
   },
   {
     "id": "p29",
@@ -324,33 +380,39 @@
     "price": 99,
     "originalPrice": 120,
     "quantity": "500 ml",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/12093a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Harpic%2BToilet%2BCleaner",
     "stock": 35,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "6"
+    "categoryId": "6",
+    "rating": 3.5,
+    "reviewCount": 28
   },
   {
     "id": "p30",
     "name": "Dolo 650 Tablet",
     "price": 30,
     "quantity": "15 tablets",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/12204a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Dolo%2B650%2BTablet",
     "stock": 100,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "7"
+    "categoryId": "7",
+    "rating": 4.8,
+    "reviewCount": 84
   },
   {
     "id": "p31",
     "name": "Vicks Vaporub",
     "price": 155,
     "quantity": "50 ml",
-    "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/12211a.jpg",
+    "image": "https://placehold.co/400x400/png?text=Vicks%2BVaporub",
     "stock": 25,
     "isCold": false,
     "isFragile": true,
-    "categoryId": "7"
+    "categoryId": "7",
+    "rating": 4.4,
+    "reviewCount": 387
   },
   {
     "id": "p32",
@@ -362,7 +424,9 @@
     "stock": 80,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "8"
+    "categoryId": "8",
+    "rating": 4.4,
+    "reviewCount": 86
   },
   {
     "id": "p33",
@@ -374,7 +438,9 @@
     "stock": 50,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "8"
+    "categoryId": "8",
+    "rating": 4.5,
+    "reviewCount": 191
   },
   {
     "id": "p34",
@@ -386,7 +452,9 @@
     "stock": 150,
     "isCold": false,
     "isFragile": true,
-    "categoryId": "3"
+    "categoryId": "3",
+    "rating": 3.9,
+    "reviewCount": 203
   },
   {
     "id": "p35",
@@ -397,7 +465,9 @@
     "stock": 90,
     "isCold": false,
     "isFragile": true,
-    "categoryId": "3"
+    "categoryId": "3",
+    "rating": 4,
+    "reviewCount": 147
   },
   {
     "id": "p36",
@@ -408,7 +478,9 @@
     "stock": 120,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "2"
+    "categoryId": "2",
+    "rating": 4.3,
+    "reviewCount": 91
   },
   {
     "id": "p37",
@@ -420,7 +492,9 @@
     "stock": 40,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "2"
+    "categoryId": "2",
+    "rating": 4.7,
+    "reviewCount": 333
   },
   {
     "id": "p38",
@@ -432,7 +506,9 @@
     "stock": 60,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "2"
+    "categoryId": "2",
+    "rating": 4.2,
+    "reviewCount": 182
   },
   {
     "id": "p39",
@@ -443,7 +519,9 @@
     "stock": 70,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "8"
+    "categoryId": "8",
+    "rating": 4.1,
+    "reviewCount": 416
   },
   {
     "id": "p40",
@@ -454,7 +532,9 @@
     "stock": 85,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "8"
+    "categoryId": "8",
+    "rating": 4.7,
+    "reviewCount": 353
   },
   {
     "id": "p41",
@@ -466,7 +546,9 @@
     "stock": 45,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "8"
+    "categoryId": "8",
+    "rating": 4.5,
+    "reviewCount": 30
   },
   {
     "id": "p42",
@@ -477,7 +559,9 @@
     "stock": 100,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "8"
+    "categoryId": "8",
+    "rating": 4,
+    "reviewCount": 433
   },
   {
     "id": "p43",
@@ -489,7 +573,9 @@
     "stock": 60,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "6"
+    "categoryId": "6",
+    "rating": 4.5,
+    "reviewCount": 377
   },
   {
     "id": "p44",
@@ -501,7 +587,9 @@
     "stock": 35,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "6"
+    "categoryId": "6",
+    "rating": 3.6,
+    "reviewCount": 344
   },
   {
     "id": "p45",
@@ -512,7 +600,9 @@
     "stock": 40,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "8"
+    "categoryId": "8",
+    "rating": 4.4,
+    "reviewCount": 396
   },
   {
     "id": "p46",
@@ -523,7 +613,9 @@
     "stock": 25,
     "isCold": false,
     "isFragile": true,
-    "categoryId": "8"
+    "categoryId": "8",
+    "rating": 4.9,
+    "reviewCount": 414
   },
   {
     "id": "p47",
@@ -534,7 +626,9 @@
     "stock": 80,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "7"
+    "categoryId": "7",
+    "rating": 4.4,
+    "reviewCount": 342
   },
   {
     "id": "p48",
@@ -546,7 +640,9 @@
     "stock": 55,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "8"
+    "categoryId": "8",
+    "rating": 4.2,
+    "reviewCount": 374
   },
   {
     "id": "p49",
@@ -558,7 +654,9 @@
     "stock": 40,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "8"
+    "categoryId": "8",
+    "rating": 3.8,
+    "reviewCount": 92
   },
   {
     "id": "p50",
@@ -569,6 +667,8 @@
     "stock": 90,
     "isCold": false,
     "isFragile": false,
-    "categoryId": "8"
+    "categoryId": "8",
+    "rating": 4.6,
+    "reviewCount": 104
   }
 ]
