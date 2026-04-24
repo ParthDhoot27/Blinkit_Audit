@@ -1,63 +1,88 @@
-# Blinkit Clone Audit Enhancements
+# ⚡ Blinkit Clone - Premium Audit Enhancements
 
-A robust, pixel-perfect clone of the Blinkit app built with React Native and Expo. This project extends a base implementation to include advanced e-commerce features, complex state management, and real-time simulations.
+A high-fidelity, production-ready React Native (Expo) application mimicking the **Blinkit** user experience. This project features a state-of-the-art design system, complex inventory simulations, and advanced mobile functionalities.
 
-## 🚀 Features & Improvements Over Base Audit
+---
 
-### 1. Robust Data & UI Refinements
-- **Extensive Catalog**: The `stock.json` now includes 50 categorized items (Vegetables, Dairy, Snacks, Beverages, Sweets, Cleaning, Healthcare, Personal Care) with high-quality imagery.
-- **Global Ratings**: Every item now has a base rating and review count, simulating a lively ecosystem.
-- **Dynamic Pricing**: Many items feature original prices with a strikethrough, simulating real-world discounts.
-- **Home Screen Redesign**: The Home screen is completely revamped to focus on 9 bestsellers (3x3 grid), a new scrolling Category section, and customized sections for reordering and reviewing items.
-- **All Items Browser**: Added a dedicated `AllItemsScreen` featuring a split layout with a scrollable left sidebar for categories and a right-side grid for products, closely mirroring real-world quick commerce apps.
-- **Notch Handling**: Fully integrated `react-native-safe-area-context` to properly manage UI overlap with the mobile notch and camera cutouts on all devices.
-- **Dynamic Search**: An interactive search bar that provides real-time, drop-down suggestions and allows instant navigation to products.
-- **Functional Categories**: The "Shop by Category" badges on the Home screen now act as functional filters for the product grid below.
+## 🌟 Major Highlights & New Features
 
-### 2. Advanced Cart & Checkout Experience
-- **Coupons**: Added a functional coupon input field. (Try `WELCOME20` for 20% off or `FREEDELIVERY` for waived delivery fees).
-- **Split Delivery Management**: Cart items can now be split into multiple packets. To ensure quality, only items marked as `isCold` can be manually moved to "Packet 2 (Cold/Fragile)" using dedicated buttons.
-- **Payment Options**: Users can now select between "Pay Online" and "Cash on Delivery" at checkout.
+### 1. 🎨 Premium UI/UX Design System
+- **Brand Consistency**: Standardized the app with Blinkit's signature yellow (`#F8CB46`) and green (`#1C8A3B`) palette.
+- **Smooth Circularity**: Applied a uniform `borderRadius: 20` (and `12` for smaller components) across the entire app for a modern, friendly, and premium look.
+- **Dark Mode Support**: Fully integrated theme context that shifts the entire UI (Home, Cart, Profile, Product screens) into a sleek dark aesthetic.
+- **Optimized for APK**: Explicitly forced `#000` text colors across all components to ensure perfect readability on production Android builds, even with varied system settings.
 
-### 3. Out-Of-Stock (OOC) Management System
-The app features a dynamic real-time inventory simulator (inventory randomly drops every 30 seconds). We handle OOC events at two critical stages:
-- **Pre-Payment OOC**: If an item in your cart goes out of stock *before* you pay, it is crossed out with a red strike, the total bill recalculates automatically, and the checkout button becomes disabled until the item is removed.
-- **Post-Payment OOC**: We simulate a scenario where an item goes out of stock *just after* order placement. This can be triggered in the Tracking Screen, resulting in:
-  - For Online Payments: A 2.5s simulated loading sequence, followed by a "Refund Initiated" notice.
-  - For COD Payments: A notification informing the user to pay the revised amount to the delivery agent.
+### 2. 🚛 Interactive Tracking & Logistics
+- **Animated Map Tracking**: A simulated delivery experience in the `TrackingScreen` featuring a moving **scooty icon** 🛵 that travels along a visual path towards the user's home icon.
+- **Live Order Status**: Dynamic status updates (e.g., "Arriving in 5 mins", "Delivery Partner is on the way") that transition as the order progresses.
+- **Delivery Partner Tips**: Users can now leave a tip (₹20, ₹30, ₹50) for the delivery partner directly within the tracking interface.
 
-### 4. Tracking, Past Orders, and Reordering
-- **Profile Redesign**: The profile page is completely revamped into a clean, list-based menu featuring preferences, old orders, edit profile, and an app-sharing option.
-- **Dark Mode Preview**: A new "Dark Mode" toggle in the profile settings switches the app's global theme context, applying a dark background to the Profile and Home screens.
-- **Parallel Ordering**: The context state now supports holding multiple active orders simultaneously.
-- **Tracking Screen**: A dedicated tracking page where users can toggle between their active and past orders via a horizontal scroll tab. All previous orders are visible here.
-- **Buy Again (Home & Tracking)**: Past orders that have been "Delivered" are extracted to the Home screen for quick reordering. There's also a **Buy Again** button in the Tracking screen that instantly adds all available items back to the active cart.
-- **Simulations**: The Tracking Screen allows users to manually trigger Post-Payment OOC events or "Simulate Delivery" events for active orders.
-- **Interactive Review System**: Once an order is delivered, users can review items directly from the Home screen or Tracking screen. The Product details page has been upgraded to support an interactive 5-star rating system and text review form. Submitted reviews are saved globally and factored into the product's average rating.
+### 3. 💸 Advanced Refund Processing Page
+- **Post-Payment OOC Event**: Simulates a scenario where an item goes out of stock *after* payment is made.
+- **Refund Visualizer**: A dedicated **Refund Processing** screen that handles online payments with:
+    - A spinning loader for "Initiating Refund".
+    - A success state showing the exact refund amount and remaining order total.
+    - Transparent messaging for "Cash on Delivery" revised payments.
+
+### 4. 📸 Camera-Powered Global Reviews
+- **Expo Camera Integration**: Built a custom camera interface using `expo-camera` (`CameraView`) that allows users to take and attach real photos to their product reviews.
+- **Photo Management**: Users can preview, add multiple photos, or remove them before submitting.
+- **Live Review Engine**:
+    - Reviews are saved to a global context (`AppContext`).
+    - **Real-time Product Page Updates**: Average ratings and review counts are recalculated instantly.
+    - **Visual Review Feed**: Product pages now display a dynamic feed of user-submitted reviews, complete with photos, satisfaction tags, and verified buyer badges.
+- **Direct Product Reviews**: Added a "Rate Product" button directly on the Product Details page for a frictionless feedback loop.
+
+### 5. 🛒 Smart Cart & Inventory Engine
+- **Split Delivery (Cold/Fragile)**: Intelligent cart logic that identifies `isCold` items and allows users to manually move them to a separate "Cold Packet ❄️" for specialized handling.
+- **Real-time Stock Simulator**: A background interval randomly depletes stock across the catalog, triggering "Out of Stock" (OOC) events in the cart before or after payment.
+- **Dynamic Image Engine**: Integrated a resolver that automatically replaces placeholder images with high-quality, keyword-based photos from the **LoremFlickr API** for a professional catalog appearance.
+
+### 6. 🎧 Support & Customer Care
+- **Need Help? Integration**: A floating support button in the Profile section that links users to customer care.
+- **Support Flow**: Integrated messaging icons and contact options for delivery partners and store support.
+
+---
 
 ## 🛠 Tech Stack
-- React Native
-- Expo
-- React Navigation (Native Stack)
-- Context API (State Management)
-- Lucide React Native (Icons)
+- **Framework**: React Native with Expo (SDK 54)
+- **State Management**: Context API (Global App State)
+- **Navigation**: React Navigation (Native Stack)
+- **Icons**: Lucide React Native
+- **Media**: Expo Camera, Expo Image
+- **Animations**: React Native Animated API
 
-## 📦 Running the Project
+---
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Start the Expo server:
-   ```bash
-   npx expo start
-   ```
-3. Use the Expo Go app on your phone or an emulator to view the app.
+## 📦 Getting Started
 
-## 🧪 How to Test the New Features
+### 1. Install Dependencies
+```bash
+npm install
+```
 
-- **Split Delivery**: Add an item like "Amul Milk" to the cart. Go to the Cart screen, and you will see a button to move it to Packet 2 (Cold). Try adding "Almonds" and notice it cannot be moved.
-- **OOC Simulator**: 
-  - *Pre-payment*: Add items to cart. Wait 30-60 seconds on the cart screen. As the background interval randomly reduces stock, some items will cross out and block checkout.
-  - *Post-payment*: Checkout normally. Go to Profile -> Track Orders. Tap "Simulate Post-Payment OOC Event".
-- **Coupons**: In the cart, type `WELCOME20` and click Apply.
+### 2. Install Native Modules (If needed)
+```bash
+npx expo install expo-camera expo-image-picker expo-status-bar
+```
+
+### 3. Start Development Server
+```bash
+npx expo start
+```
+
+---
+
+## 🧪 Testing Guide
+
+- **Trigger a Refund**: Place an order with **Online Payment**. Go to `Profile -> Track Orders` and tap the **Simulate Item Out-of-Stock** button. You will be taken to the new Refund Processing page.
+- **Add a Review with Photo**: Go to any delivered order (or a product page) and tap **Rate Product**. Grant camera permission, snap a photo, and submit. Check the product page to see the live update.
+- **Watch the Scooty**: Place an order and view the tracking screen to see the animated scooty move along the delivery path!
+
+---
+
+## 📝 Design Philosophy
+The app follows a **"Premium Quick Commerce"** philosophy:
+- **Minimalist yet Vibrant**: Focus on clear typography (Inter/System) and high-contrast call-to-action buttons.
+- **Feedback Focused**: Every action (adding to cart, applying a coupon, submitting a review) provides immediate visual feedback.
+- **Responsive Layouts**: Designed to look stunning on both small and large-screen mobile devices.

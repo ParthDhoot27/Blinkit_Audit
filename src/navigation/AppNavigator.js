@@ -9,6 +9,8 @@ import ProfileScreen from '../screens/ProfileScreen';
 import TrackingScreen from '../screens/TrackingScreen';
 import ReviewScreen from '../screens/ReviewScreen';
 import AllItemsScreen from '../screens/AllItemsScreen';
+import ReviewSubmittedScreen from '../screens/ReviewSubmittedScreen';
+import RefundProcessingScreen from '../screens/RefundProcessingScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -30,6 +32,8 @@ export default function AppNavigator() {
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Tracking" component={TrackingScreen} options={{ title: 'Track Orders' }} />
         <Stack.Screen name="Review" component={ReviewScreen} options={{ title: 'Review Items' }} />
+        <Stack.Screen name="ReviewSubmitted" component={ReviewSubmittedScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="RefundProcessing" component={RefundProcessingScreen} options={{ headerShown: false }} />
         <Stack.Screen name="AllItems" component={AllItemsScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>

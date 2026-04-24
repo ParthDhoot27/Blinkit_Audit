@@ -2,40 +2,39 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, TextInput, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppContext } from '../context/AppContext';
-import { Minus, Plus, Trash2, ArrowRightLeft } from 'lucide-react-native';
+import { Minus, Plus, Trash2, ArrowRightLeft, Info, ChevronRight } from 'lucide-react-native';
 
 export default function CartScreen({ navigation }) {
-  const { 
-    currentUser, 
-    stock, 
-    updateCartQuantity, 
-    removeFromCart, 
+  const {
+    currentUser,
+    stock,
+    updateCartQuantity,
+    removeFromCart,
     checkout,
-    moveItemToPacket
+    moveItemToPacket,
+    theme
   } = useAppContext();
 
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('Online');
-  const [showRefundPipeline, setShowRefundPipeline] = useState(false);
+
+  const isDark = theme === 'dark';
 
   if (!currentUser) {
     return (
-      <View style={styles.centerContainer}>
-        <Text>Please login to view cart</Text>
+      <View style={[styles.centerContainer, isDark && styles.bgDark]}>
+        <Text style={[isDark && styles.textLight]}>Please login to view cart</Text>
+        <TouchableOpacity style={styles.browseBtn} onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.browseBtnText}>Login</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
   const cartItems = currentUser.cart || [];
-  
   const packet1Items = cartItems.filter(item => item.packet === 1 || !item.packet);
   const packet2Items = cartItems.filter(item => item.packet === 2);
-
-  const hasOOCItems = cartItems.some(item => {
-    const currentStockItem = stock.find(s => s.id === item.id);
-    return !currentStockItem || currentStockItem.stock <= 0;
-  });
 
   const itemTotal = cartItems.reduce((total, item) => {
     const currentStockItem = stock.find(s => s.id === item.id);
@@ -46,13 +45,9 @@ export default function CartScreen({ navigation }) {
   }, 0);
 
   const deliveryFee = itemTotal > 0 ? 15 : 0;
-  
   let discount = 0;
-  if (appliedCoupon === 'WELCOME20') {
-    discount = Math.floor(itemTotal * 0.2);
-  } else if (appliedCoupon === 'FREEDELIVERY') {
-    discount = deliveryFee;
-  }
+  if (appliedCoupon === 'WELCOME20') discount = Math.floor(itemTotal * 0.2);
+  else if (appliedCoupon === 'FREEDELIVERY') discount = deliveryFee;
 
   const finalTotal = itemTotal + deliveryFee - discount;
 
@@ -62,202 +57,165 @@ export default function CartScreen({ navigation }) {
       setAppliedCoupon(code);
       Alert.alert("Coupon Applied!", `You are saving with ${code}`);
     } else {
-      Alert.alert("Invalid Coupon", "Please enter a valid coupon code.");
-      setAppliedCoupon(null);
+      Alert.alert("Invalid Coupon", "Try WELCOME20");
     }
   };
 
   const handleCheckout = () => {
-    if (itemTotal === 0) {
-      Alert.alert("Empty Cart", "Add available items to checkout.");
-      return;
-    }
-    if (hasOOCItems) {
-      Alert.alert("Items Unavailable", "Please remove out of stock items before proceeding.");
-      return;
-    }
+    if (itemTotal === 0) return;
     const success = checkout(paymentMethod);
     if (success) {
-      setShowRefundPipeline(true);
-      Alert.alert("Order Placed", "Your order is placed successfully!");
+      navigation.navigate('Tracking');
     }
   };
 
-  const renderCartItem = ({ item }) => {
+  const renderCartItem = (item) => {
     const currentStockItem = stock.find(s => s.id === item.id);
     const isOutOfStock = !currentStockItem || currentStockItem.stock <= 0;
     const currentPacket = item.packet || 1;
 
     return (
-      <View style={[styles.cartItem, isOutOfStock && styles.outOfStockItem]}>
-        <Image source={{ uri: item.image }} style={styles.itemImage} />
-        <View style={styles.itemDetails}>
-          <Text style={[styles.itemName, isOutOfStock && styles.strikethrough]}>{item.name}</Text>
-          <Text style={styles.itemQuantity}>{item.quantity}</Text>
-          <Text style={[styles.itemPrice, isOutOfStock && styles.strikethrough]}>₹{item.price}</Text>
-          
-          {isOutOfStock && (
-            <View>
-              <Text style={styles.outOfStockText}>Unavailable (Cannot be bought)</Text>
-              <Text style={styles.alternativeText}>Please remove to proceed.</Text>
-            </View>
-          )}
-          
-          {item.isCold && !isOutOfStock && (
-            <TouchableOpacity 
-              style={styles.movePacketBtn}
-              onPress={() => moveItemToPacket(item.id, currentPacket === 1 ? 2 : 1)}
-            >
-              <ArrowRightLeft size={12} color="#0066cc" />
-              <Text style={styles.movePacketText}>
-                Move to Packet {currentPacket === 1 ? '2 (Cold)' : '1'}
-              </Text>
-            </TouchableOpacity>
-          )}
+      // items cards
+      <View key={item.id} style={[styles.cartItem, isOutOfStock && styles.outOfStockItem, isDark && styles.cardDark]}>
+        <View style={styles.itemMain}>
+          <Image source={{ uri: item.image }} style={styles.itemImage} resizeMode="contain" />
+          <View style={styles.itemDetails}>
+            <Text style={[styles.itemName, isOutOfStock && styles.strikethrough, isDark && styles.textLight]}>{item.name}</Text>
+            <Text style={styles.itemWeight}>{item.quantity}</Text>
+            <Text style={[styles.itemPrice, isDark && styles.textLight]}>₹{item.price}</Text>
+
+            {item.isCold && !isOutOfStock && (
+              <TouchableOpacity
+                style={styles.packetBadge}
+                onPress={() => moveItemToPacket(item.id, currentPacket === 1 ? 2 : 1)}
+              >
+                <Text style={styles.packetBadgeText}>
+                  {currentPacket === 1 ? 'Move to Cold Packet' : 'Tap to remove ❄️'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
 
-        <View style={styles.actionContainer}>
-          {!isOutOfStock && (
-            <View style={styles.quantityControls}>
-              <TouchableOpacity onPress={() => updateCartQuantity(item.id, -1)} style={styles.controlBtn}>
-                <Minus size={16} color="green" />
+        <View style={styles.itemActions}>
+          {!isOutOfStock ? (
+            <View style={styles.qtyContainer}>
+              <TouchableOpacity onPress={() => updateCartQuantity(item.id, -1)} style={styles.qtyBtn}>
+                <Minus size={14} color="#1C8A3B" />
               </TouchableOpacity>
-              <Text style={styles.quantityText}>{item.cartQuantity}</Text>
-              <TouchableOpacity onPress={() => updateCartQuantity(item.id, 1)} style={styles.controlBtn}>
-                <Plus size={16} color="green" />
+              <Text style={styles.qtyText}>{item.cartQuantity}</Text>
+              <TouchableOpacity onPress={() => updateCartQuantity(item.id, 1)} style={styles.qtyBtn}>
+                <Plus size={14} color="#1C8A3B" />
               </TouchableOpacity>
             </View>
+          ) : (
+            <TouchableOpacity onPress={() => removeFromCart(item.id)} style={styles.removeBtnLarge}>
+              <Text style={styles.removeBtnText}>Remove</Text>
+            </TouchableOpacity>
           )}
-          <TouchableOpacity onPress={() => removeFromCart(item.id)} style={styles.removeBtn}>
-            <Trash2 size={20} color={isOutOfStock ? "#d32f2f" : "#666"} />
-          </TouchableOpacity>
         </View>
       </View>
     );
   };
 
-  if (showRefundPipeline) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.refundContainer}>
-          <Text style={styles.refundTitle}>Payment Processed</Text>
-          <Text style={styles.successText}>Order is being prepared!</Text>
-          <TouchableOpacity style={styles.backHomeBtn} onPress={() => navigation.navigate('Home')}>
-            <Text style={styles.backHomeText}>Back to Home</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.trackBtn} onPress={() => {
-            setShowRefundPipeline(false);
-            navigation.navigate('Tracking');
-          }}>
-            <Text style={styles.trackBtnText}>Track Order</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, isDark && styles.bgDark]}>
       {cartItems.length > 0 ? (
         <View style={{ flex: 1 }}>
-          <ScrollView contentContainerStyle={styles.scrollContent}>
-            
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+
+            <View style={styles.deliveryInfo}>
+              <Text style={styles.deliveryTitle}>Delivering to Home</Text>
+              <Text style={styles.deliveryAddress} numberOfLines={1}>{currentUser.address.building}, {currentUser.address.city}</Text>
+            </View>
+
             {packet1Items.length > 0 && (
-              <View style={styles.packetContainer}>
-                <Text style={styles.packetTitle}>📦 Packet 1 (Regular Items)</Text>
-                {packet1Items.map(item => <React.Fragment key={item.id}>{renderCartItem({item})}</React.Fragment>)}
+              <View style={styles.section}>
+                <Text style={[styles.sectionHeading, isDark && styles.textLight]}>📦 Packet 1 (Regular)</Text>
+                {packet1Items.map(item => renderCartItem(item))}
               </View>
             )}
 
             {packet2Items.length > 0 && (
-              <View style={styles.packetContainer}>
-                <Text style={styles.packetTitle}>❄️ Packet 2 (Cold/Fragile Items)</Text>
-                {packet2Items.map(item => <React.Fragment key={item.id}>{renderCartItem({item})}</React.Fragment>)}
+              <View style={styles.section}>
+                <Text style={[styles.sectionHeading, isDark && styles.textLight]}>❄️ Packet 2 (Cold/Fragile)</Text>
+                {packet2Items.map(item => renderCartItem(item))}
               </View>
             )}
 
-            <View style={styles.couponSection}>
-              <Text style={styles.sectionTitle}>Apply Coupon</Text>
+            <View style={[styles.card, isDark && styles.cardDark]}>
+              <Text style={[styles.cardTitle, isDark && styles.textLight]}>Offers & Benefits</Text>
               <View style={styles.couponRow}>
                 <TextInput
-                  style={styles.couponInput}
-                  placeholder="Enter code (e.g., WELCOME20)"
+                  style={[styles.couponInput, isDark && styles.bgDarkLine, isDark && styles.textLight]}
+                  placeholder="Enter coupon code"
+                  placeholderTextColor="#999"
                   value={couponCode}
                   onChangeText={setCouponCode}
                 />
                 <TouchableOpacity style={styles.applyBtn} onPress={handleApplyCoupon}>
-                  <Text style={styles.applyBtnText}>Apply</Text>
+                  <Text style={styles.applyBtnText}>APPLY</Text>
                 </TouchableOpacity>
               </View>
-              {appliedCoupon && (
-                <Text style={styles.appliedText}>✓ Coupon '{appliedCoupon}' applied!</Text>
-              )}
+              {appliedCoupon && <Text style={styles.appliedSuccess}>✓ {appliedCoupon} applied!</Text>}
             </View>
 
-            <View style={styles.billSummary}>
-              <Text style={styles.sectionTitle}>Bill Summary</Text>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Item Total</Text>
-                <Text style={styles.summaryValue}>₹{itemTotal}</Text>
+            <View style={[styles.card, isDark && styles.cardDark]}>
+              <Text style={[styles.cardTitle, isDark && styles.textLight]}>Bill Summary</Text>
+              <View style={styles.billRow}>
+                <Text style={styles.billLabel}>Item Total</Text>
+                <Text style={[styles.billValue, isDark && styles.textLight]}>₹{itemTotal}</Text>
               </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Delivery Fee</Text>
-                <Text style={styles.summaryValue}>₹{deliveryFee}</Text>
+              <View style={styles.billRow}>
+                <Text style={styles.billLabel}>Delivery Charge</Text>
+                <Text style={[styles.billValue, isDark && styles.textLight]}>₹{deliveryFee}</Text>
               </View>
               {discount > 0 && (
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabelDiscount}>Coupon Discount</Text>
-                  <Text style={styles.summaryValueDiscount}>-₹{discount}</Text>
+                <View style={styles.billRow}>
+                  <Text style={styles.discountLabel}>Coupon Discount</Text>
+                  <Text style={styles.discountValue}>-₹{discount}</Text>
                 </View>
               )}
               <View style={styles.divider} />
-              <View style={styles.summaryRow}>
-                <Text style={styles.finalTotalLabel}>Grand Total</Text>
-                <Text style={styles.finalTotalValue}>₹{finalTotal}</Text>
+              <View style={styles.billRow}>
+                <Text style={[styles.grandTotalLabel, isDark && styles.textLight]}>Grand Total</Text>
+                <Text style={[styles.grandTotalValue, isDark && styles.textLight]}>₹{finalTotal}</Text>
               </View>
             </View>
 
-            <View style={styles.paymentSection}>
-              <Text style={styles.sectionTitle}>Payment Method</Text>
-              <View style={styles.paymentOptions}>
-                <TouchableOpacity 
-                  style={[styles.paymentOption, paymentMethod === 'Online' && styles.paymentOptionActive]}
-                  onPress={() => setPaymentMethod('Online')}
-                >
-                  <Text style={[styles.paymentOptionText, paymentMethod === 'Online' && styles.paymentOptionTextActive]}>Pay Online</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.paymentOption, paymentMethod === 'COD' && styles.paymentOptionActive]}
-                  onPress={() => setPaymentMethod('COD')}
-                >
-                  <Text style={[styles.paymentOptionText, paymentMethod === 'COD' && styles.paymentOptionTextActive]}>Cash on Delivery</Text>
-                </TouchableOpacity>
-              </View>
+            <View style={[styles.card, isDark && styles.cardDark]}>
+              <Text style={[styles.cardTitle, isDark && styles.textLight]}>Cancellation Policy</Text>
+              <Text style={styles.policyText}>
+                Orders cannot be cancelled once packed for delivery. In case of unexpected issues, a refund will be initiated.
+              </Text>
             </View>
 
           </ScrollView>
 
-          <View style={styles.checkoutBar}>
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Total To Pay</Text>
-              <Text style={styles.totalAmount}>₹{finalTotal}</Text>
+          <View style={[styles.footer, isDark && styles.bgDark]}>
+            <View style={styles.paymentMethodRow}>
+              <Text style={[styles.pmLabel, isDark && styles.textLight]}>Payment: {paymentMethod}</Text>
+              <TouchableOpacity onPress={() => setPaymentMethod(paymentMethod === 'Online' ? 'COD' : 'Online')}>
+                <Text style={styles.changePmText}>CHANGE</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity 
-              style={[styles.checkoutBtn, hasOOCItems && styles.disabledBtn]} 
-              onPress={handleCheckout}
-              disabled={hasOOCItems}
-            >
-              <Text style={styles.checkoutBtnText}>
-                {hasOOCItems ? 'Remove Unavailable Items' : 'Proceed to Checkout'}
-              </Text>
+            <TouchableOpacity style={styles.checkoutBtn} onPress={handleCheckout}>
+              <View>
+                <Text style={styles.totalPayText}>₹{finalTotal}</Text>
+                <Text style={styles.totalSubText}>TOTAL</Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.placeOrderText}>Place Order</Text>
+                <ChevronRight color="#fff" size={20} />
+              </View>
             </TouchableOpacity>
           </View>
         </View>
       ) : (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Your cart is empty</Text>
+        <View style={[styles.emptyContainer, isDark && styles.bgDark]}>
+          <Text style={[styles.emptyText, isDark && styles.textLight]}>Your cart is empty</Text>
           <TouchableOpacity style={styles.browseBtn} onPress={() => navigation.navigate('Home')}>
-            <Text style={styles.browseBtnText}>Browse Products</Text>
+            <Text style={styles.browseBtnText}>Start Shopping</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -270,338 +228,318 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
+  bgDark: {
+    backgroundColor: '#121212',
+  },
+  cardDark: {
+    backgroundColor: '#1e1e1e',
+    borderColor: '#333',
+  },
+  bgDarkLine: {
+    backgroundColor: '#2a2a2a',
+  },
+  textLight: {
+    color: '#fff',
+  },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   scrollContent: {
-    padding: 15,
-    paddingBottom: 40,
+    padding: 16,
+    paddingTop: 0,
+    paddingBottom: 130,
   },
-  packetContainer: {
-    marginBottom: 20,
+  deliveryInfo: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
-  packetTitle: {
+  deliveryTitle: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#666',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  deliveryAddress: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#000',
+    marginTop: 4,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionHeading: {
     fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    paddingBottom: 8,
+    fontWeight: '900',
+    color: '#000',
+    marginBottom: 12,
+    marginLeft: 4,
   },
   cartItem: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 10,
+    marginBottom: 5,
     flexDirection: 'row',
-    marginBottom: 15,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#eee',
   },
-  outOfStockItem: {
-    backgroundColor: '#fffafa',
-    opacity: 0.8,
+  itemMain: {
+    flexDirection: 'row',
+    flex: 1,
+    alignContent: "center",
+    alignItems: "center"
   },
   itemImage: {
-    width: 60,
-    height: 60,
-    resizeMode: 'contain',
-    marginRight: 15,
-    backgroundColor: '#f9f9f9',
+    width: 55,
+    height: 70,
     borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    marginRight: 12,
   },
   itemDetails: {
     flex: 1,
+    justifyContent: 'center',
   },
   itemName: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 5,
-    color: '#111',
-  },
-  itemQuantity: {
     fontSize: 12,
-    color: '#777',
-    marginBottom: 5,
+    fontWeight: '600',
+    color: '#000',
+  },
+  itemWeight: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
   },
   itemPrice: {
     fontSize: 15,
+    fontWeight: '700',
+    color: '#000',
+    marginTop: 4,
+  },
+  packetBadge: {
+    marginTop: 5,
+    backgroundColor: '#e8f5e9',
+    paddingHorizontal: 6,
+    paddingVertical: 5,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+  },
+  packetBadgeText: {
+    fontSize: 10,
+    color: '#1C8A3B',
+    fontWeight: '800',
+  },
+  itemActions: {
+    marginLeft: 10,
+  },
+  qtyContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#1C8A3B',
+    borderRadius: 12,
+    padding: 4,
+  },
+  qtyBtn: {
+    padding: 5,
+  },
+  qtyText: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#1C8A3B',
+    marginHorizontal: 8,
+  },
+  removeBtnLarge: {
+    backgroundColor: '#ffebee',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  removeBtnText: {
+    color: '#d32f2f',
+    fontSize: 12,
     fontWeight: 'bold',
-    color: '#111',
   },
   strikethrough: {
     textDecorationLine: 'line-through',
-    color: '#d32f2f',
+    color: '#999',
   },
-  outOfStockText: {
-    color: '#d32f2f',
-    fontWeight: 'bold',
-    fontSize: 11,
-    marginTop: 5,
-  },
-  alternativeText: {
-    color: '#666',
-    fontSize: 10,
-    marginTop: 2,
-  },
-  movePacketBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    backgroundColor: '#e6f2ff',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    alignSelf: 'flex-start',
-  },
-  movePacketText: {
-    color: '#0066cc',
-    fontSize: 10,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  actionContainer: {
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-  },
-  quantityControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 6,
-    padding: 4,
-  },
-  controlBtn: {
-    padding: 4,
-  },
-  quantityText: {
-    marginHorizontal: 10,
-    fontWeight: 'bold',
-  },
-  removeBtn: {
-    marginTop: 10,
-    padding: 5,
-  },
-  couponSection: {
+  card: {
     backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 20,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#111',
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#000',
+    marginBottom: 15,
   },
   couponRow: {
     flexDirection: 'row',
+    gap: 10,
   },
   couponInput: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    height: 40,
-    marginRight: 10,
     backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    height: 48,
+    fontSize: 14,
+    color: '#000',
+    fontWeight: '600',
   },
   applyBtn: {
     backgroundColor: '#1C8A3B',
     justifyContent: 'center',
-    alignItems: 'center',
     paddingHorizontal: 15,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   applyBtnText: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontWeight: '900',
+    fontSize: 13,
   },
-  appliedText: {
+  appliedSuccess: {
     color: '#1C8A3B',
-    fontWeight: 'bold',
     fontSize: 12,
-    marginTop: 8,
+    fontWeight: 'bold',
+    marginTop: 10,
   },
-  billSummary: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  summaryRow: {
+  billRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 7,
   },
-  summaryLabel: {
-    color: '#555',
-    fontSize: 13,
-  },
-  summaryValue: {
-    color: '#111',
+  billLabel: {
+    fontSize: 14,
+    color: '#666',
     fontWeight: '500',
-    fontSize: 13,
   },
-  summaryLabelDiscount: {
-    color: '#1C8A3B',
-    fontSize: 13,
+  billValue: {
+    fontSize: 14,
+    color: '#000',
+    fontWeight: '600',
   },
-  summaryValueDiscount: {
+  discountLabel: {
+    fontSize: 14,
     color: '#1C8A3B',
-    fontWeight: 'bold',
-    fontSize: 13,
+    fontWeight: '600',
+  },
+  discountValue: {
+    fontSize: 14,
+    color: '#1C8A3B',
+    fontWeight: '800',
   },
   divider: {
     height: 1,
-    backgroundColor: '#eee',
-    marginVertical: 10,
+    backgroundColor: '#f0f0f0',
+    marginVertical: 15,
   },
-  finalTotalLabel: {
-    fontWeight: 'bold',
-    fontSize: 15,
-    color: '#111',
-  },
-  finalTotalValue: {
-    fontWeight: 'bold',
+  grandTotalLabel: {
     fontSize: 16,
-    color: '#111',
+    fontWeight: '900',
+    color: '#000',
   },
-  paymentSection: {
+  grandTotalValue: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#000',
+  },
+  policyText: {
+    fontSize: 12,
+    color: '#888',
+    lineHeight: 18,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: '#fff',
     padding: 15,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  paymentOptions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  paymentOption: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginHorizontal: 5,
-  },
-  paymentOptionActive: {
-    borderColor: '#1C8A3B',
-    backgroundColor: '#e8f5e9',
-  },
-  paymentOptionText: {
-    color: '#555',
-    fontWeight: '500',
-  },
-  paymentOptionTextActive: {
-    color: '#1C8A3B',
-    fontWeight: 'bold',
-  },
-  checkoutBar: {
-    backgroundColor: '#fff',
-    padding: 15,
-    paddingBottom: 25,
+    paddingBottom: 30,
     borderTopWidth: 1,
     borderColor: '#eee',
   },
-  totalRow: {
+  paymentMethodRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
+    paddingHorizontal: 5,
   },
-  totalLabel: {
+  pmLabel: {
     fontSize: 14,
-    color: '#555',
+    fontWeight: '700',
+    color: '#000',
   },
-  totalAmount: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#111',
+  changePmText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#1C8A3B',
   },
   checkoutBtn: {
     backgroundColor: '#1C8A3B',
-    paddingVertical: 15,
-    borderRadius: 10,
+    borderRadius: 16,
+    height: 60,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 20,
   },
-  disabledBtn: {
-    backgroundColor: '#999',
-  },
-  checkoutBtnText: {
+  totalPayText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  totalSubText: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 10,
     fontWeight: 'bold',
+  },
+  placeOrderText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '900',
+    marginRight: 5,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
   emptyText: {
     fontSize: 18,
     color: '#666',
+    fontWeight: '600',
     marginBottom: 20,
   },
   browseBtn: {
     backgroundColor: '#1C8A3B',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 16,
   },
   browseBtnText: {
     color: '#fff',
     fontWeight: 'bold',
-  },
-  refundContainer: {
-    padding: 30,
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  refundTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#1C8A3B',
-  },
-  successText: {
     fontSize: 16,
-    color: '#555',
-    marginBottom: 30,
-  },
-  backHomeBtn: {
-    backgroundColor: '#eee',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    width: '100%',
-    marginBottom: 15,
-  },
-  backHomeText: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    color: '#333',
-  },
-  trackBtn: {
-    backgroundColor: '#F8CB46',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    width: '100%',
-  },
-  trackBtnText: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    color: '#000',
   }
 });

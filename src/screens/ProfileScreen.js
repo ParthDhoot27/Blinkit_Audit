@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Switch, Alert, ScrollView } from 'react-native';
 import { useAppContext } from '../context/AppContext';
-import { Settings, Package, User, Moon, Share2, LogOut, ChevronRight } from 'lucide-react-native';
+import { Settings, Package, User, Moon, Share2, LogOut, ChevronRight, MessageCircle } from 'lucide-react-native';
 
 export default function ProfileScreen({ navigation }) {
   const { currentUser, logout, theme, setTheme } = useAppContext();
@@ -120,6 +120,16 @@ export default function ProfileScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Support Chat Floating Button */}
+      <TouchableOpacity 
+        style={styles.supportBtn} 
+        onPress={() => Alert.alert('Support', 'Connecting to support chat...')}
+        activeOpacity={0.8}
+      >
+        <MessageCircle size={28} color="#fff" />
+        <Text style={styles.supportBtnText}>Need Help?</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -127,7 +137,7 @@ export default function ProfileScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
   },
   bgDark: {
     backgroundColor: '#121212',
@@ -145,7 +155,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
   },
   loginBtn: {
     marginTop: 20,
@@ -158,30 +168,30 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   content: {
-    padding: 20,
+    padding: 24,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 35,
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: '#F8CB46',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
   },
   avatarText: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#000',
   },
   name: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: '900',
     marginBottom: 5,
     color: '#000',
   },
@@ -190,20 +200,18 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   section: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
+    backgroundColor: '#f9f9f9',
+    padding: 20,
+    borderRadius: 20,
+    marginBottom: 25,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
+    marginBottom: 12,
+    color: '#000',
   },
   addressText: {
     fontSize: 14,
@@ -212,18 +220,17 @@ const styles = StyleSheet.create({
   },
   menuList: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 30,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
+    borderRadius: 20,
+    marginBottom: 35,
+    borderWidth: 1,
+    borderColor: '#eee',
+    overflow: 'hidden',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
+    padding: 18,
   },
   menuItemLeft: {
     flexDirection: 'row',
@@ -233,12 +240,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 15,
     color: '#333',
-    fontWeight: '500',
+    fontWeight: '600',
   },
   divider: {
     height: 1,
-    backgroundColor: '#eee',
-    marginLeft: 50,
+    backgroundColor: '#f0f0f0',
+    marginLeft: 55,
   },
   dividerDark: {
     backgroundColor: '#333',
@@ -247,15 +254,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#e23744',
-    padding: 15,
-    borderRadius: 12,
+    borderColor: '#eee',
+    padding: 18,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 100,
   },
   logoutBtnText: {
     color: '#e23744',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  supportBtn: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    backgroundColor: '#1C8A3B',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 30,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  supportBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginLeft: 10,
+    fontSize: 15,
   }
 });

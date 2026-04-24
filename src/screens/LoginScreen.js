@@ -1,63 +1,107 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Image, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useAppContext } from '../context/AppContext';
 
 export default function LoginScreen({ navigation }) {
-  const { login } = useAppContext();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { login, theme } = useAppContext();
+  const [phone, setPhone] = useState('');
+  const isDark = theme === 'dark';
 
   const handleLogin = () => {
-    if (login(email, password)) {
-      navigation.goBack();
+    // Basic validation for demo
+    if (phone.length >= 10) {
+      // In a real app, this would trigger OTP
+      // For this demo, we'll just log in a default user
+      if (login('riya@test.com', 'password123')) {
+        navigation.goBack();
+      }
     } else {
-      Alert.alert("Login Failed", "Invalid email or password");
+      alert("Please enter a valid phone number");
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Login to Blinkit</Text>
-        <Text style={styles.subtitle}>Enter your details to continue</Text>
-        
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g. riya@test.com"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-        </View>
+    <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header Image Area */}
+          <View style={styles.headerImageContainer}>
+            <Image
+              source={require('../../assets/img1.jpg')}
+              style={styles.headerImage}
+              resizeMode="cover"
+            />
+          </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-        </View>
+          <View style={styles.content}>
+            <Text style={styles.brandName}>blink<Text style={{ color: '#1C8A3B' }}>it</Text></Text>
+            <Text style={styles.tagline}>Groceries delivered in minutes</Text>
 
-        <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
-          <Text style={styles.loginBtnText}>Login</Text>
-        </TouchableOpacity>
+            <View style={styles.badgeRow}>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>⏱ 10 min Delivery</Text>
+              </View>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>💰 COD Accepted</Text>
+              </View>
+            </View>
+            <View style={styles.badgeRow}>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>🔒 OTP verified</Text>
+              </View>
+            </View>
 
-        <View style={styles.testCredentials}>
-          <Text style={styles.testTitle}>Test Credentials:</Text>
-          <Text>riya@test.com / password123</Text>
-          <Text>arjun@test.com / password123</Text>
-        </View>
+            <Text style={styles.inputLabel}>Mobile Number</Text>
+            <View style={styles.inputWrapper}>
+              <View style={styles.countryCode}>
+                <Text style={styles.countryCodeText}>+91</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="92XXXXXXXX2"
+                placeholderTextColor="#999"
+                keyboardType="phone-pad"
+                maxLength={10}
+                value={phone}
+                onChangeText={setPhone}
+              />
+            </View>
 
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={styles.backBtnText}>Go Back</Text>
-        </TouchableOpacity>
-      </View>
+            <View style={styles.infoBox}>
+              <Text style={styles.infoIcon}>🔒</Text>
+              <Text style={styles.infoText}>
+                We'll send a one-time password. No UPI or banking access required.
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.getOtpBtn, phone.length < 10 && styles.disabledBtn]}
+              onPress={handleLogin}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.getOtpBtnText}>Get OTP →</Text>
+            </TouchableOpacity>
+
+            <View style={styles.divider}>
+              <View style={styles.line} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.line} />
+            </View>
+
+            <TouchableOpacity style={styles.googleBtn} activeOpacity={0.7}>
+              <Text style={styles.googleBtnText}>Continue with Google</Text>
+            </TouchableOpacity>
+
+            <View style={styles.testCredentials}>
+              <Text style={styles.testTitle}>Demo Mode:</Text>
+              <Text style={styles.testSubtitle}>Enter any 10-digit number to log in as Riya</Text>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -67,71 +111,174 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  containerDark: {
+    backgroundColor: '#121212',
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  headerImageContainer: {
+    height: '15%',
+    width: '100%',
+  },
+  headerImage: {
+    width: '100%',
+    height: '100%',
+  },
   content: {
-    padding: 20,
-    flex: 1,
-    justifyContent: 'center',
+    padding: 24,
+    paddingTop: 10,
+    paddingBottom: 50,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
+  brandName: {
+    fontSize: 42,
+    fontWeight: '900',
+    color: '#000',
+    letterSpacing: -1,
   },
-  subtitle: {
+  tagline: {
     fontSize: 16,
     color: '#666',
-    marginBottom: 40,
-    textAlign: 'center',
+    marginTop: -4,
+    marginBottom: 25,
   },
-  inputContainer: {
-    marginBottom: 20,
+  badgeRow: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    gap: 10,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
+  badge: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  badgeText: {
+    fontSize: 12,
     color: '#333',
+    fontWeight: '500',
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: '#555',
+    marginTop: 20,
+    marginBottom: 10,
+    fontWeight: '500',
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    height: 56,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  countryCode: {
+    width: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRightWidth: 1,
+    borderRightColor: '#e0e0e0',
+    backgroundColor: '#eee',
+  },
+  countryCodeText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
   },
   input: {
+    flex: 1,
+    paddingHorizontal: 15,
+    fontSize: 18,
+    color: '#000',
+    letterSpacing: 1,
+  },
+  infoBox: {
+    flexDirection: 'row',
+    backgroundColor: '#fff8e1',
+    padding: 10,
+    borderRadius: 16,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#ffecb3',
+    alignItems: 'center',
+  },
+  infoIcon: {
+    fontSize: 16,
+    marginRight: 10,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#6d4c41',
+    lineHeight: 16,
+  },
+  getOtpBtn: {
+    backgroundColor: '#F8CB46',
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 30,
+    shadowColor: '#F8CB46',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  disabledBtn: {
+    backgroundColor: '#ffe082',
+    shadowOpacity: 0,
+  },
+  getOtpBtnText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#eee',
+  },
+  dividerText: {
+    paddingHorizontal: 15,
+    color: '#999',
+    fontSize: 14,
+  },
+  googleBtn: {
+    height: 56,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 15,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
-  },
-  loginBtn: {
-    backgroundColor: '#e23744',
-    padding: 15,
-    borderRadius: 8,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
+    backgroundColor: '#fff',
   },
-  loginBtnText: {
-    color: '#fff',
+  googleBtnText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    color: '#333',
   },
   testCredentials: {
-    marginTop: 30,
-    padding: 15,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
+    marginTop: 40,
     alignItems: 'center',
   },
   testTitle: {
+    fontSize: 12,
     fontWeight: 'bold',
-    marginBottom: 5,
+    color: '#999',
+    marginBottom: 4,
   },
-  backBtn: {
-    marginTop: 20,
-    alignItems: 'center',
-    padding: 15,
-  },
-  backBtnText: {
-    color: '#666',
-    fontSize: 16,
-    fontWeight: '600',
+  testSubtitle: {
+    fontSize: 11,
+    color: '#bbb',
   }
 });
