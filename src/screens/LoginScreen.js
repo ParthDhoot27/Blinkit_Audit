@@ -12,8 +12,10 @@ export default function LoginScreen({ navigation }) {
     if (phone.length >= 10) {
       // In a real app, this would trigger OTP
       // For this demo, we'll just log in a default user
-      if (login('riya@test.com', 'password123')) {
+      if (login(phone, 'password123')) {
         navigation.goBack();
+      } else {
+        alert("User not found! Try mobile: 9876543210");
       }
     } else {
       alert("Please enter a valid phone number");
@@ -97,7 +99,7 @@ export default function LoginScreen({ navigation }) {
 
             <View style={styles.testCredentials}>
               <Text style={styles.testTitle}>Demo Mode:</Text>
-              <Text style={styles.testSubtitle}>Enter any 10-digit number to log in as Riya</Text>
+              <Text style={styles.testSubtitle}>Enter any 10-digit number to log in as Renu</Text>
             </View>
           </View>
         </ScrollView>

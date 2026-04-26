@@ -1,8 +1,9 @@
 [
   {
     "id": "u1",
-    "name": "Riya",
-    "email": "riya@test.com",
+    "name": "Renu",
+    "mobile": "0000000000",
+    "email": "renu@test.com",
     "password": "password123",
     "address": {
       "lane": "Street 42",
@@ -10,88 +11,17 @@
       "city": "Mumbai"
     },
     "cart": [],
-    "orders": [
+    "walletBalance": 2000,
+    "transactions": [
       {
-        "id": "ord_1001",
-        "items": [
-          { "id": "p1", "name": "Amul Taaza Toned Fresh Milk", "price": 27, "cartQuantity": 2, "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/1c0db977-31ab-4d8e-abf3-d42e4a4b4632.jpg" },
-          { "id": "p14", "name": "Lay's India's Magic Masala", "price": 20, "cartQuantity": 3, "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/12204a.jpg" }
-        ],
-        "date": "2026-04-20T10:00:00.000Z",
-        "status": "Delivered",
-        "paymentMethod": "Online",
-        "originalTotal": 114
-      },
-      {
-        "id": "ord_1002",
-        "items": [
-          { "id": "p32", "name": "Colgate Strong Teeth", "price": 55, "cartQuantity": 1, "image": "https://images.unsplash.com/photo-1614735241165-6756e1df61ab?w=300&q=80" },
-          { "id": "p33", "name": "Oral-B Toothbrush", "price": 40, "cartQuantity": 2, "image": "https://images.unsplash.com/photo-1554125791-0e42d76ee64f?w=300&q=80" }
-        ],
-        "date": "2026-04-15T14:30:00.000Z",
-        "status": "Delivered",
-        "paymentMethod": "COD",
-        "originalTotal": 135
-      },
-      {
-        "id": "ord_1003",
-        "items": [
-          { "id": "p34", "name": "Maggi 2-Minute Noodles", "price": 12, "cartQuantity": 5, "image": "https://images.unsplash.com/photo-1612929633738-8fe01f37e415?w=300&q=80" }
-        ],
-        "date": "2026-04-10T18:15:00.000Z",
-        "status": "Delivered",
-        "paymentMethod": "Online",
-        "originalTotal": 60
+        "id": "tx_1",
+        "type": "Credit",
+        "amount": 2000,
+        "date": "2026-04-18T12:00:00.000Z",
+        "itemName": "Wallet Top-up"
       }
     ],
-    "theme": "yellow"
-  },
-  {
-    "id": "u2",
-    "name": "Arjun",
-    "email": "arjun@test.com",
-    "password": "password123",
-    "address": {
-      "lane": "Lane 5",
-      "building": "Greenwood",
-      "city": "Delhi"
-    },
-    "cart": [],
-    "orders": [
-      {
-        "id": "ord_2001",
-        "items": [
-          { "id": "p23", "name": "Cadbury Dairy Milk Silk", "price": 85, "cartQuantity": 1, "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/12530a.jpg" },
-          { "id": "p26", "name": "Haldiram's Kaju Katli", "price": 250, "cartQuantity": 1, "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/108398a.jpg" }
-        ],
-        "date": "2026-04-21T09:20:00.000Z",
-        "status": "Delivered",
-        "paymentMethod": "Online",
-        "originalTotal": 335
-      },
-      {
-        "id": "ord_2002",
-        "items": [
-          { "id": "p18", "name": "Coca-Cola Original", "price": 40, "cartQuantity": 2, "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/12716a.jpg" },
-          { "id": "p17", "name": "Doritos Nacho Cheese", "price": 50, "cartQuantity": 1, "image": "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/433890a.jpg" }
-        ],
-        "date": "2026-04-18T16:45:00.000Z",
-        "status": "Delivered",
-        "paymentMethod": "COD",
-        "originalTotal": 130
-      },
-      {
-        "id": "ord_2003",
-        "items": [
-          { "id": "p41", "name": "Head & Shoulders Shampoo", "price": 180, "cartQuantity": 1, "image": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=300&q=80" },
-          { "id": "p42", "name": "Parachute Coconut Oil", "price": 45, "cartQuantity": 1, "image": "https://images.unsplash.com/photo-1608681289115-38144b62dbb4?w=300&q=80" }
-        ],
-        "date": "2026-04-12T11:10:00.000Z",
-        "status": "Delivered",
-        "paymentMethod": "Online",
-        "originalTotal": 225
-      }
-    ],
+    "orders": [],
     "theme": "yellow"
   }
 ]

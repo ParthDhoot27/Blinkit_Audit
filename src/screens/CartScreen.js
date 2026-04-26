@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, TextInput, Alert, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppContext } from '../context/AppContext';
 import { Minus, Plus, Trash2, ArrowRightLeft, Info, ChevronRight } from 'lucide-react-native';
 
+/**
+ * CartScreen: Manages the user's shopping cart.
+ * Handles quantity adjustments, item removal, packet splitting (Regular vs Cold),
+ * coupon application, and the final checkout process.
+ */
 export default function CartScreen({ navigation }) {
+  // --- Context & State ---
   const {
     currentUser,
     stock,
@@ -12,8 +18,10 @@ export default function CartScreen({ navigation }) {
     removeFromCart,
     checkout,
     moveItemToPacket,
-    theme
+    theme,
+    notification
   } = useAppContext();
+  const insets = useSafeAreaInsets();
 
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
@@ -21,6 +29,7 @@ export default function CartScreen({ navigation }) {
 
   const isDark = theme === 'dark';
 
+  // 1. Auth Check: Prompt login if user is guest
   if (!currentUser) {
     return (
       <View style={[styles.centerContainer, isDark && styles.bgDark]}>
@@ -32,12 +41,15 @@ export default function CartScreen({ navigation }) {
     );
   }
 
+  // 2. Data Filtering: Split cart items into Regular (Packet 1) and Cold/Fragile (Packet 2)
   const cartItems = currentUser.cart || [];
   const packet1Items = cartItems.filter(item => item.packet === 1 || !item.packet);
   const packet2Items = cartItems.filter(item => item.packet === 2);
 
+  // 3. Bill Calculation Logic
   const itemTotal = cartItems.reduce((total, item) => {
     const currentStockItem = stock.find(s => s.id === item.id);
+    // Only charge for items that are currently in stock
     if (currentStockItem && currentStockItem.stock > 0) {
       return total + (item.price * item.cartQuantity);
     }
@@ -46,11 +58,16 @@ export default function CartScreen({ navigation }) {
 
   const deliveryFee = itemTotal > 0 ? 15 : 0;
   let discount = 0;
+  
+  // Coupon logic
   if (appliedCoupon === 'WELCOME20') discount = Math.floor(itemTotal * 0.2);
   else if (appliedCoupon === 'FREEDELIVERY') discount = deliveryFee;
 
   const finalTotal = itemTotal + deliveryFee - discount;
 
+  /**
+   * Validates and applies discount codes.
+   */
   const handleApplyCoupon = () => {
     const code = couponCode.toUpperCase().trim();
     if (code === 'WELCOME20' || code === 'FREEDELIVERY') {
@@ -61,6 +78,9 @@ export default function CartScreen({ navigation }) {
     }
   };
 
+  /**
+   * Finalizes the order and navigates to the tracking screen.
+   */
   const handleCheckout = () => {
     if (itemTotal === 0) return;
     const success = checkout(paymentMethod);
@@ -69,21 +89,26 @@ export default function CartScreen({ navigation }) {
     }
   };
 
+  /**
+   * Renders an individual item within the cart list.
+   * Handles "Out of Stock" visual states and "Packet Splitting" triggers.
+   */
   const renderCartItem = (item) => {
     const currentStockItem = stock.find(s => s.id === item.id);
     const isOutOfStock = !currentStockItem || currentStockItem.stock <= 0;
     const currentPacket = item.packet || 1;
 
     return (
-      // items cards
       <View key={item.id} style={[styles.cartItem, isOutOfStock && styles.outOfStockItem, isDark && styles.cardDark]}>
         <View style={styles.itemMain}>
           <Image source={{ uri: item.image }} style={styles.itemImage} resizeMode="contain" />
           <View style={styles.itemDetails}>
             <Text style={[styles.itemName, isOutOfStock && styles.strikethrough, isDark && styles.textLight]}>{item.name}</Text>
+            {item.isOutOfStock && <Text style={styles.oocApology}>Apology: This item is now out of stock.</Text>}
             <Text style={styles.itemWeight}>{item.quantity}</Text>
             <Text style={[styles.itemPrice, isDark && styles.textLight]}>₹{item.price}</Text>
 
+            {/* Packet Management: Allow user to move cold/fragile items to separate packets */}
             {item.isCold && !isOutOfStock && (
               <TouchableOpacity
                 style={styles.packetBadge}
@@ -97,6 +122,7 @@ export default function CartScreen({ navigation }) {
           </View>
         </View>
 
+        {/* Quantity and Removal Controls */}
         <View style={styles.itemActions}>
           {!isOutOfStock ? (
             <View style={styles.qtyContainer}>
@@ -119,16 +145,18 @@ export default function CartScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={[styles.container, isDark && styles.bgDark]}>
+    <View style={[styles.container, isDark && styles.bgDark]}>
       {cartItems.length > 0 ? (
         <View style={{ flex: 1 }}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
+            {/* Destination Info */}
             <View style={styles.deliveryInfo}>
               <Text style={styles.deliveryTitle}>Delivering to Home</Text>
               <Text style={styles.deliveryAddress} numberOfLines={1}>{currentUser.address.building}, {currentUser.address.city}</Text>
             </View>
 
+            {/* Regular Packet Display */}
             {packet1Items.length > 0 && (
               <View style={styles.section}>
                 <Text style={[styles.sectionHeading, isDark && styles.textLight]}>📦 Packet 1 (Regular)</Text>
@@ -136,6 +164,7 @@ export default function CartScreen({ navigation }) {
               </View>
             )}
 
+            {/* Cold/Fragile Packet Display */}
             {packet2Items.length > 0 && (
               <View style={styles.section}>
                 <Text style={[styles.sectionHeading, isDark && styles.textLight]}>❄️ Packet 2 (Cold/Fragile)</Text>
@@ -143,6 +172,7 @@ export default function CartScreen({ navigation }) {
               </View>
             )}
 
+            {/* Offer Application Card */}
             <View style={[styles.card, isDark && styles.cardDark]}>
               <Text style={[styles.cardTitle, isDark && styles.textLight]}>Offers & Benefits</Text>
               <View style={styles.couponRow}>
@@ -160,6 +190,7 @@ export default function CartScreen({ navigation }) {
               {appliedCoupon && <Text style={styles.appliedSuccess}>✓ {appliedCoupon} applied!</Text>}
             </View>
 
+            {/* Itemized Bill Summary */}
             <View style={[styles.card, isDark && styles.cardDark]}>
               <Text style={[styles.cardTitle, isDark && styles.textLight]}>Bill Summary</Text>
               <View style={styles.billRow}>
@@ -192,13 +223,27 @@ export default function CartScreen({ navigation }) {
 
           </ScrollView>
 
-          <View style={[styles.footer, isDark && styles.bgDark]}>
+          {/* Sticky Checkout Footer */}
+          <View style={[styles.footer, isDark && styles.bgDark, { paddingBottom: Math.max(20, insets.bottom + 10) }]}>
+            
+            {/* Payment Method Selector */}
             <View style={styles.paymentMethodRow}>
               <Text style={[styles.pmLabel, isDark && styles.textLight]}>Payment: {paymentMethod}</Text>
-              <TouchableOpacity onPress={() => setPaymentMethod(paymentMethod === 'Online' ? 'COD' : 'Online')}>
+              <TouchableOpacity 
+                onPress={() => {
+                  // Cycle through available payment methods
+                  if (paymentMethod === 'Online') setPaymentMethod('COD');
+                  else if (paymentMethod === 'COD') {
+                    if ((currentUser.walletBalance || 0) >= finalTotal) setPaymentMethod('Wallet');
+                    else setPaymentMethod('Online');
+                  } else setPaymentMethod('Online');
+                }}
+              >
                 <Text style={styles.changePmText}>CHANGE</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Place Order CTA */}
             <TouchableOpacity style={styles.checkoutBtn} onPress={handleCheckout}>
               <View>
                 <Text style={styles.totalPayText}>₹{finalTotal}</Text>
@@ -212,6 +257,7 @@ export default function CartScreen({ navigation }) {
           </View>
         </View>
       ) : (
+        /* Empty Cart Placeholder */
         <View style={[styles.emptyContainer, isDark && styles.bgDark]}>
           <Text style={[styles.emptyText, isDark && styles.textLight]}>Your cart is empty</Text>
           <TouchableOpacity style={styles.browseBtn} onPress={() => navigation.navigate('Home')}>
@@ -219,7 +265,7 @@ export default function CartScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -375,6 +421,12 @@ const styles = StyleSheet.create({
   strikethrough: {
     textDecorationLine: 'line-through',
     color: '#999',
+  },
+  oocApology: {
+    fontSize: 10,
+    color: '#d32f2f',
+    fontWeight: 'bold',
+    marginTop: 2,
   },
   card: {
     backgroundColor: '#fff',

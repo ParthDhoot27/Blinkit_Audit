@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator, Animated, Easing, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator, Animated, Easing, Dimensions, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppContext } from '../context/AppContext';
 import { Image, ScrollView } from 'react-native';
@@ -7,35 +7,58 @@ import { Phone, MessageSquare, Info } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
+/**
+ * TrackingScreen: Provides real-time visual tracking of orders.
+ * Includes a simulated delivery map, delivery partner information, 
+ * tipping functionality, and order status management.
+ */
 export default function TrackingScreen({ navigation }) {
+  // --- Context & State ---
   const { currentUser, simulatePostPaymentOOC, markOrderDelivered, buyAgain, addTipToOrder, theme } = useAppContext();
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const isDark = theme === 'dark';
 
+  // Animation reference for the delivery "scooty" (scooter)
   const scootyAnim = useRef(new Animated.Value(0)).current;
 
-  // Default to the most recent order if available
+  // 1. Initial Selection: Default to the most recent order on mount
   useEffect(() => {
     if (currentUser?.orders?.length > 0 && !selectedOrderId) {
       setSelectedOrderId(currentUser.orders[0].id);
     }
   }, [currentUser]);
 
-  // Animation for scooty
-  useEffect(() => {
-    if (selectedOrderId) {
-      scootyAnim.setValue(0);
-      Animated.loop(
-        Animated.timing(scootyAnim, {
-          toValue: 1,
-          duration: 10000,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        })
-      ).start();
-    }
-  }, [selectedOrderId]);
+  // Derived state for the currently selected order
+  const selectedOrder = currentUser?.orders?.find(o => o.id === selectedOrderId);
 
+  // 2. Delivery Animation Logic:
+  // Calculates the scooty's position based on elapsed time since the order was placed.
+  // The simulation duration is fixed at 15 seconds.
+  useEffect(() => {
+    if (selectedOrderId && selectedOrder) {
+      const deliveryDuration = 30000; // 15 seconds total delivery time for demo
+      const orderTime = new Date(selectedOrder.date).getTime();
+      const elapsed = Date.now() - orderTime;
+      const progress = Math.min(1, Math.max(0, elapsed / deliveryDuration));
+
+      if (selectedOrder.status === 'Delivered') {
+        scootyAnim.setValue(1); // Set to final destination
+      } else {
+        scootyAnim.setValue(progress);
+        if (progress < 1) {
+          // Resume animation from current progress to 1 (Home)
+          Animated.timing(scootyAnim, {
+            toValue: 1,
+            duration: deliveryDuration * (1 - progress),
+            easing: Easing.linear,
+            useNativeDriver: true,
+          }).start();
+        }
+      }
+    }
+  }, [selectedOrderId, selectedOrder?.status]);
+
+  // Empty state handling
   if (!currentUser || !currentUser.orders || currentUser.orders.length === 0) {
     return (
       <SafeAreaView style={[styles.centerContainer, isDark && styles.bgDark]}>
@@ -47,8 +70,10 @@ export default function TrackingScreen({ navigation }) {
     );
   }
 
-  const selectedOrder = currentUser.orders.find(o => o.id === selectedOrderId);
-
+  /**
+   * Manual trigger for the Out-of-Stock simulation.
+   * Redirects to the Refund screen for Online/Wallet payments.
+   */
   const handleSimulateOOC = () => {
     const result = simulatePostPaymentOOC(selectedOrderId);
     if (!result) {
@@ -59,6 +84,7 @@ export default function TrackingScreen({ navigation }) {
     if (result.paymentMethod === 'Online') {
       navigation.navigate('RefundProcessing', { refundData: result });
     } else {
+      // For COD, we just notify the user about the price adjustment
       Alert.alert(
         "We apologize",
         `Unfortunately, ${result.itemName} went out of stock while processing.\n\nSince this is a Cash on Delivery order, please pay the revised amount of ₹${result.newTotal} to the delivery agent.`,
@@ -67,22 +93,32 @@ export default function TrackingScreen({ navigation }) {
     }
   };
 
-  const handleSimulateDelivery = () => {
+  /**
+   * Finalizes the delivery and prompts the user for a review.
+   */
+  const handleConfirmDelivery = () => {
     markOrderDelivered(selectedOrderId);
     Alert.alert("Delivered!", "Your order has been delivered successfully.", [
       { text: "Review Items", onPress: () => navigation.navigate('Review', { orderId: selectedOrderId }) },
-      { text: "Cancel", style: "cancel" }
+      { text: "Dismiss", style: "cancel" }
     ]);
   };
 
-  const translateX = scootyAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, width - 100],
-  });
+  /**
+   * Re-adds all items from the selected order back to the cart.
+   */
+  const handleBuyAgain = (orderId) => {
+    const success = buyAgain(orderId);
+    if (success) {
+      Alert.alert("Added to Cart", "Items from this order have been added to your cart.");
+      navigation.navigate('Cart');
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.container, isDark && styles.bgDark]}>
 
+      {/* Horizontal Order Selection Tabs */}
       <View style={[styles.dropdownSection, isDark && styles.cardDark]}>
         <Text style={[styles.sectionTitle, isDark && styles.textLight]}>Select Order to Track</Text>
         <FlatList
@@ -107,62 +143,126 @@ export default function TrackingScreen({ navigation }) {
       <ScrollView showsVerticalScrollIndicator={false}>
         {selectedOrder && (
           <View style={styles.detailsSection}>
-            {selectedOrder.status !== 'Delivered' && (
+
+            {/* 1. Animated Delivery Map Section */}
+            {!selectedOrder.delivered && (
               <View style={[styles.mapContainer, isDark && styles.cardDark]}>
-                <View style={styles.mapHeader}>
-                  <Text style={styles.mapHeaderTextSmall}>Arriving in 5 minutes</Text>
-                  <Text style={styles.mapHeaderTextLarge}>Delivery Partner is on the way</Text>
+                <Image 
+                  source={require('../../assets/map.png')} 
+                  style={styles.mapBg} 
+                  resizeMode="cover"
+                />
+                
+                {/* Store Icon */}
+                <View style={[styles.locationMarker, { right: 40, top: 50 }]}>
+                  <View style={styles.markerCircle}><Text style={styles.locationIcon}>🏪</Text></View>
+                  <Text style={styles.locationLabel}>Store</Text>
                 </View>
 
-                <View style={styles.mapArea}>
-                  {/* Visual Path */}
-                  <View style={styles.mapPath} />
-
-                  {/* Animated Scooty Icon */}
-                  <Animated.View style={[styles.scootyIconContainer, { transform: [{ translateX }] }]}>
-                    <Text style={{ fontSize: 30 }}>🛵</Text>
-                  </Animated.View>
-
-                  {/* Destination Marker */}
-                  <View style={styles.destinationMarker}>
-                    <Text style={{ fontSize: 24 }}>🏠</Text>
-                  </View>
+                {/* Home Icon */}
+                <View style={[styles.locationMarker, { left: 40, bottom: 50 }]}>
+                  <View style={styles.markerCircle}><Text style={styles.locationIcon}>🏠</Text></View>
+                  <Text style={styles.locationLabel}>Home</Text>
                 </View>
 
-                <View style={[styles.partnerCard, isDark && styles.bgDarkLine]}>
-                  <View style={styles.partnerInfo}>
-                    <View style={styles.partnerAvatar}>
-                      <Text style={{ fontSize: 20 }}>👤</Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={[styles.partnerName, isDark && styles.textLight]}>Rameshwar</Text>
-                      <Text style={styles.partnerRating}>⭐ 4.9 (500+ orders)</Text>
-                    </View>
-                    <View style={styles.partnerActions}>
-                      <TouchableOpacity style={styles.actionCircle}><Phone size={20} color="#1C8A3B" /></TouchableOpacity>
-                      <TouchableOpacity style={styles.actionCircle}><MessageSquare size={20} color="#1C8A3B" /></TouchableOpacity>
-                    </View>
+                {/* Animated Scooty */}
+                <Animated.View style={[
+                  styles.scootyContainer,
+                  {
+                    transform: [
+                      {
+                        translateX: scootyAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [width - 100, 50],
+                        })
+                      },
+                      {
+                        translateY: scootyAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [60, 180],
+                        })
+                      },
+                      {
+                        scaleX: -1 // Facing left (towards home)
+                      }
+                    ]
+                  }
+                ]}>
+                  <View style={styles.scootyWrapper}>
+                    <Text style={styles.scootyIcon}>🛵</Text>
+                    <View style={styles.scootyTail} />
                   </View>
-                  <Text style={styles.partnerStatus}>I'm picking up your order from the store</Text>
-                </View>
+                </Animated.View>
 
-                <View style={styles.tipCard}>
-                  <Text style={[styles.tipTitle, isDark && styles.textLight]}>Delivering happiness at your doorstep!</Text>
-                  <Text style={styles.tipSub}>Thank them by leaving a tip</Text>
-                  <View style={styles.tipRow}>
-                    {[20, 30, 50].map(amt => (
-                      <TouchableOpacity
-                        key={amt}
-                        style={[styles.tipBtn, selectedOrder.tipAmount === amt && styles.tipBtnActive]}
-                        onPress={() => addTipToOrder(selectedOrderId, amt)}>
-                        <Text style={[styles.tipBtnText, selectedOrder.tipAmount === amt && styles.tipBtnTextActive]}>🤩 ₹{amt}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+                <View style={styles.mapOverlay}>
+                  <Text style={styles.etaText}>Scooty reaching in 15 seconds...</Text>
                 </View>
               </View>
             )}
 
+            {/* 2. Success Banner (Delivered State) */}
+            {selectedOrder.delivered && (
+              <View style={styles.deliveredSuccessContainer}>
+                <Text style={styles.deliveredIcon}>✅</Text>
+                <Text style={[styles.deliveredText, isDark && styles.textLight]}>Order Delivered Successfully!</Text>
+
+                <View style={styles.deliveredActions}>
+                  <TouchableOpacity
+                    style={styles.rateBtn}
+                    onPress={() => navigation.navigate('Review', { orderId: selectedOrderId })}
+                  >
+                    <Text style={styles.rateBtnText}>Rate Products</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.buyAgainBtn}
+                    onPress={() => handleBuyAgain(selectedOrder.id)}
+                  >
+                    <Text style={styles.buyAgainBtnText}>Buy Again</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {/* 3. Delivery Partner Info Card */}
+            {!selectedOrder.delivered && (
+              <View style={[styles.partnerCard, isDark && styles.bgDarkLine]}>
+                <View style={styles.partnerInfo}>
+                  <View style={styles.partnerAvatar}>
+                    <Text style={{ fontSize: 20 }}>👤</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.partnerName, isDark && styles.textLight]}>Rameshwar</Text>
+                    <Text style={styles.partnerRating}>⭐ 4.9 (500+ orders)</Text>
+                  </View>
+                  <View style={styles.partnerActions}>
+                    <TouchableOpacity style={styles.actionCircle}><Phone size={20} color="#1C8A3B" /></TouchableOpacity>
+                    <TouchableOpacity style={styles.actionCircle}><MessageSquare size={20} color="#1C8A3B" /></TouchableOpacity>
+                  </View>
+                </View>
+                <Text style={styles.partnerStatus}>I'm picking up your order from the store</Text>
+              </View>
+            )}
+
+            {/* 4. Tipping Interaction Section */}
+            {!selectedOrder.delivered && (
+              <View style={styles.tipCard}>
+                <Text style={[styles.tipTitle, isDark && styles.textLight]}>Delivering happiness at your doorstep!</Text>
+                <Text style={styles.tipSub}>Thank them by leaving a tip</Text>
+                <View style={styles.tipRow}>
+                  {[20, 30, 50].map(amt => (
+                    <TouchableOpacity
+                      key={amt}
+                      style={[styles.tipBtn, selectedOrder.tipAmount === amt && styles.tipBtnActive]}
+                      onPress={() => addTipToOrder(selectedOrderId, amt)}>
+                      <Text style={[styles.tipBtnText, selectedOrder.tipAmount === amt && styles.tipBtnTextActive]}>🤩 ₹{amt}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* 5. Detailed Bill / Item List Card */}
             <View style={[styles.card, isDark && styles.cardDark]}>
               <View style={styles.cardHeader}>
                 <Text style={[styles.cardTitle, isDark && styles.textLight]}>Order Details</Text>
@@ -178,7 +278,11 @@ export default function TrackingScreen({ navigation }) {
 
               {selectedOrder.items.map((item, index) => (
                 <View key={index} style={styles.itemRow}>
-                  <Text style={[styles.itemName, item.isOOCAfterPayment && styles.strikethrough, isDark && styles.textLight]}>
+                  <Text style={[
+                    styles.itemName,
+                    item.isOOCAfterPayment && styles.strikethrough, // Strike through items that were refunded post-payment
+                    isDark && styles.textLight
+                  ]}>
                     {item.cartQuantity} x {item.name}
                   </Text>
                   <Text style={[styles.itemPrice, isDark && styles.textLight]}>₹{item.price * item.cartQuantity}</Text>
@@ -193,34 +297,23 @@ export default function TrackingScreen({ navigation }) {
               </View>
             </View>
 
-            {selectedOrder.status !== 'Delivered' && (
+            {/* 6. Interaction Area (Confirm Delivery or Simulation) */}
+            {!selectedOrder.delivered && (
               <View style={styles.actionsSection}>
-                {!selectedOrder.isOOCMocked && (
-                  <TouchableOpacity style={styles.simOocBtn} onPress={handleSimulateOOC}>
-                    <Text style={styles.simOocBtnText}>Simulate Item Out-of-Stock</Text>
+                {/* 
+                   Wait Logic: Only allow manual confirmation if 15 seconds have passed,
+                   simulating the arrival of the delivery person.
+                */}
+                {(Date.now() - new Date(selectedOrder.date).getTime() >= 20000) ? (
+                  <TouchableOpacity style={styles.confirmDelBtn} onPress={handleConfirmDelivery}>
+                    <Text style={styles.confirmDelText}>CONFIRM DELIVERY</Text>
                   </TouchableOpacity>
+                ) : (
+                  <View style={styles.waitingContainer}>
+                    <ActivityIndicator color="#1C8A3B" />
+                    <Text style={styles.waitingText}>Waiting for arrival...</Text>
+                  </View>
                 )}
-
-                <TouchableOpacity style={styles.simDelBtn} onPress={handleSimulateDelivery}>
-                  <Text style={styles.simDelBtnText}>Simulate Order Delivery</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {selectedOrder.status === 'Delivered' && (
-              <View style={styles.deliveredActions}>
-                <TouchableOpacity
-                  style={styles.buyAgainBtn}
-                  onPress={() => {
-                    buyAgain(selectedOrderId);
-                    navigation.navigate('Cart');
-                  }}
-                >
-                  <Text style={styles.buyAgainBtnText}>Buy Again</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.reviewBtn} onPress={() => navigation.navigate('Review', { orderId: selectedOrderId })}>
-                  <Text style={styles.reviewBtnText}>Rate your items ⭐</Text>
-                </TouchableOpacity>
               </View>
             )}
           </View>
@@ -318,55 +411,80 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   mapContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#e0e0e0',
     borderRadius: 20,
     overflow: 'hidden',
     marginBottom: 20,
+    height: 300,
     borderWidth: 1,
     borderColor: '#eee',
     shadowColor: '#000',
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 4,
   },
-  mapHeader: {
-    backgroundColor: '#1C8A3B',
-    padding: 18,
-  },
-  mapHeaderTextSmall: {
-    color: '#e8f5e9',
-    fontSize: 12,
-    fontWeight: 'bold',
-    marginBottom: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  mapHeaderTextLarge: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '900',
-  },
-  mapArea: {
-    height: 120,
-    backgroundColor: '#f0f4f0',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  mapPath: {
-    height: 4,
-    backgroundColor: '#ddd',
-    borderRadius: 2,
+  mapBg: {
     width: '100%',
-    position: 'absolute',
-    alignSelf: 'center',
+    height: '100%',
+    opacity: 0.8,
   },
-  scootyIconContainer: {
+  locationMarker: {
     position: 'absolute',
-    left: 20,
+    alignItems: 'center',
+    zIndex: 10,
   },
-  destinationMarker: {
+  markerCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  locationIcon: { fontSize: 20 },
+  locationLabel: { 
+    fontSize: 10, 
+    color: '#000', 
+    fontWeight: 'bold',
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    paddingHorizontal: 4,
+    borderRadius: 4,
+    marginTop: 2
+  },
+  scootyContainer: { 
+    position: 'absolute', 
+    zIndex: 20,
+  },
+  scootyWrapper: {
+    alignItems: 'center',
+  },
+  scootyIcon: { fontSize: 32 },
+  scootyTail: {
+    width: 4,
+    height: 10,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 2,
+    marginTop: -5,
+  },
+  mapOverlay: {
     position: 'absolute',
-    right: 20,
+    bottom: 10,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  etaText: { 
+    fontSize: 12, 
+    color: '#1C8A3B', 
+    fontWeight: 'bold',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
   partnerCard: {
     padding: 18,
@@ -548,54 +666,78 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
   },
-  simDelBtn: {
-    backgroundColor: '#1C8A3B',
-    padding: 18,
-    borderRadius: 16,
+  deliveredSuccessContainer: {
+    backgroundColor: '#e8f5e9',
+    padding: 30,
+    borderRadius: 20,
     alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#c8e6c9',
   },
-  simDelBtnText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
+  deliveredIcon: {
+    fontSize: 40,
+    marginBottom: 10,
+  },
+  deliveredText: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#1b5e20',
+    marginBottom: 20,
   },
   deliveredActions: {
+    flexDirection: 'row',
     gap: 12,
+    width: '100%',
+  },
+  rateBtn: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#1C8A3B',
+    padding: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  rateBtnText: {
+    color: '#1C8A3B',
+    fontWeight: 'bold',
   },
   buyAgainBtn: {
+    flex: 1,
     backgroundColor: '#1C8A3B',
-    padding: 18,
-    borderRadius: 16,
+    padding: 15,
+    borderRadius: 12,
     alignItems: 'center',
   },
   buyAgainBtnText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
   },
-  reviewBtn: {
-    backgroundColor: '#F8CB46',
+  confirmDelBtn: {
+    backgroundColor: '#1C8A3B',
     padding: 18,
     borderRadius: 16,
     alignItems: 'center',
+    marginBottom: 15,
   },
-  reviewBtnText: {
-    color: '#000',
+  confirmDelText: {
+    color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
   },
-  loadingOverlay: {
-    position: 'absolute',
-    top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    justifyContent: 'center',
+  waitingContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    zIndex: 1000,
+    justifyContent: 'center',
+    padding: 15,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    marginBottom: 15,
+    gap: 10,
   },
-  loadingText: {
-    marginTop: 15,
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1C8A3B',
+  waitingText: {
+    color: '#666',
+    fontWeight: '600',
   }
 });

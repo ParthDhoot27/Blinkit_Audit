@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Switch, Alert, ScrollView } from 'react-native';
 import { useAppContext } from '../context/AppContext';
-import { Settings, Package, User, Moon, Share2, LogOut, ChevronRight, MessageCircle } from 'lucide-react-native';
+import { Settings, Package, User, Moon, Share2, LogOut, ChevronRight, MessageCircle, Wallet } from 'lucide-react-native';
 
 export default function ProfileScreen({ navigation }) {
   const { currentUser, logout, theme, setTheme } = useAppContext();
@@ -30,6 +30,13 @@ export default function ProfileScreen({ navigation }) {
       title: 'Old Orders',
       icon: <Package size={24} color={isDark ? "#fff" : "#333"} />,
       action: () => navigation.navigate('Tracking'),
+      type: 'link'
+    },
+    {
+      id: 'wallet',
+      title: 'Blinkit Wallet',
+      icon: <Wallet size={24} color={isDark ? "#fff" : "#333"} />,
+      action: () => navigation.navigate('Wallet'),
       type: 'link'
     },
     {

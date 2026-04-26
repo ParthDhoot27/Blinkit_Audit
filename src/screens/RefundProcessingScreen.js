@@ -1,18 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { CheckCircle, AlertCircle, ArrowLeft, RefreshCw } from 'lucide-react-native';
 import { useAppContext } from '../context/AppContext';
 
+/**
+ * RefundProcessingScreen: A specialized screen that displays a loading state 
+ * followed by a success confirmation for an automatic refund.
+ * This screen is typically triggered when an item goes out of stock after payment.
+ */
 export default function RefundProcessingScreen({ navigation, route }) {
+  const insets = useSafeAreaInsets(); // Hook to get safe area padding (e.g., for notch)
+  
+  // Extract refund data passed via navigation params
   const { refundData } = route.params || {};
+  
+  // Access global theme from context
   const { theme } = useAppContext();
   const isDark = theme === 'dark';
-  const [step, setStep] = useState(1); // 1: Processing, 2: Success
-  const spinValue = new Animated.Value(0);
+  
+  // step 1: Processing animation, step 2: Success summary
+  const [step, setStep] = useState(1); 
+  
+  // Animated value for the spinning refresh icon
+  const spinValue = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Spin animation for processing
+    // 1. Start the infinite spin animation for the loader
     Animated.loop(
       Animated.timing(spinValue, {
         toValue: 1,
@@ -22,23 +37,27 @@ export default function RefundProcessingScreen({ navigation, route }) {
       })
     ).start();
 
-    // Transition to success after 3 seconds
+    // 2. Simulate a delay for "processing" before showing success
     const timer = setTimeout(() => {
-      setStep(2);
+      setStep(2); // Transition to success step
     }, 3000);
 
+    // Cleanup: clear the timer if user navigates away before it finishes
     return () => clearTimeout(timer);
   }, []);
 
+  // Interpolate spin value to actual degrees
   const spin = spinValue.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
   });
 
   return (
-    <SafeAreaView style={[styles.container, isDark && styles.bgDark]}>
+    <View style={[styles.container, isDark && styles.bgDark]}>
       <StatusBar style={isDark ? "light" : "dark"} />
-      <View style={styles.header}>
+      
+      {/* Custom Header with Back Button */}
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <ArrowLeft size={24} color={isDark ? '#fff' : '#000'} />
         </TouchableOpacity>
@@ -47,12 +66,15 @@ export default function RefundProcessingScreen({ navigation, route }) {
 
       <View style={styles.content}>
         {step === 1 ? (
+          /* STEP 1: Processing View */
           <View style={styles.centerContent}>
             <Animated.View style={{ transform: [{ rotate: spin }] }}>
               <RefreshCw size={80} color="#1C8A3B" />
             </Animated.View>
             <Text style={[styles.statusTitle, isDark && styles.textLight]}>Processing Refund</Text>
-            <Text style={styles.statusSub}>We are initiating a refund of ₹{refundData?.refundAmount} for {refundData?.itemName}.</Text>
+            <Text style={styles.statusSub}>
+              We are initiating a refund of ₹{refundData?.refundAmount} for {refundData?.itemName}.
+            </Text>
             
             <View style={[styles.infoBox, isDark && styles.cardDark]}>
                <Text style={styles.infoText}>
@@ -61,11 +83,15 @@ export default function RefundProcessingScreen({ navigation, route }) {
             </View>
           </View>
         ) : (
+          /* STEP 2: Success View */
           <View style={styles.centerContent}>
             <CheckCircle size={80} color="#1C8A3B" />
             <Text style={[styles.statusTitle, isDark && styles.textLight]}>Refund Initiated</Text>
-            <Text style={styles.statusSub}>₹{refundData?.refundAmount} will be credited to your account within 3-5 business days.</Text>
+            <Text style={styles.statusSub}>
+              ₹{refundData?.refundAmount} will be credited to your account within 3-5 business days.
+            </Text>
             
+            {/* Detailed Refund Summary Card */}
             <View style={[styles.summaryCard, isDark && styles.cardDark]}>
                <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>Refund Amount</Text>
@@ -86,6 +112,7 @@ export default function RefundProcessingScreen({ navigation, route }) {
                </View>
             </View>
 
+            {/* Back Action */}
             <TouchableOpacity 
               style={styles.doneBtn}
               onPress={() => navigation.goBack()}
@@ -96,13 +123,14 @@ export default function RefundProcessingScreen({ navigation, route }) {
         )}
       </View>
 
-      <View style={styles.footer}>
+      {/* Persistent Help Footer */}
+      <View style={[styles.footer, { paddingBottom: Math.max(24, insets.bottom + 10) }]}>
          <View style={styles.helpBox}>
             <AlertCircle size={16} color="#666" />
             <Text style={styles.helpText}>Need help? Contact our 24/7 support chat.</Text>
          </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

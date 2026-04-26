@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, TextInput, Alert, Dimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, TextInput, Alert, Dimensions, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppContext } from '../context/AppContext';
-import { Star, ChevronRight, Share2, Heart, Info } from 'lucide-react-native';
+import { Star, ChevronRight, Share2, Heart, Info, ArrowLeft } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
 export default function ProductScreen({ route, navigation }) {
+  const insets = useSafeAreaInsets();
   const { productId, product: passedProduct, isReviewMode } = route.params || {};
   const { stock, currentUser, addToCart, productReviews, submitReview, theme } = useAppContext();
   const isDark = theme === 'dark';
@@ -17,7 +18,7 @@ export default function ProductScreen({ route, navigation }) {
   const product = passedProduct || stock.find(p => p.id === productId);
 
   if (!product) {
-    return <SafeAreaView><Text>Product not found</Text></SafeAreaView>;
+    return <View style={[styles.centerContainer, { paddingTop: insets.top }]}><Text>Product not found</Text></View>;
   }
 
   const currentStockItem = stock.find(s => s.id === product.id);
@@ -59,13 +60,24 @@ export default function ProductScreen({ route, navigation }) {
   ];
 
   return (
-    <SafeAreaView style={[styles.container, isDark && styles.bgDark]}>
+    <View style={[styles.container, isDark && styles.bgDark]}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={[styles.imageContainer, isDark && styles.bgDarkLine]}>
           <Image source={{ uri: product.image }} style={styles.image} resizeMode="contain" />
-          <View style={styles.imageActions}>
-            <TouchableOpacity style={styles.imgActionBtn}><Share2 size={20} color="#333" /></TouchableOpacity>
-            <TouchableOpacity style={styles.imgActionBtn}><Heart size={20} color="#333" /></TouchableOpacity>
+
+          {/* Dynamic Header Actions */}
+          <View style={[styles.headerActions, { top: insets.top + 10 }]}>
+            <TouchableOpacity
+              style={styles.imgActionBtn}
+              onPress={() => navigation.goBack()}
+            >
+              <ArrowLeft size={22} color="#333" />
+            </TouchableOpacity>
+
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity style={styles.imgActionBtn}><Share2 size={20} color="#333" /></TouchableOpacity>
+              <TouchableOpacity style={styles.imgActionBtn}><Heart size={20} color="#333" /></TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -127,7 +139,7 @@ export default function ProductScreen({ route, navigation }) {
           <View style={styles.reviewsSection}>
             <View style={styles.sectionHeaderRow}>
               <Text style={[styles.sectionTitle, isDark && styles.textLight]}>Ratings & Reviews</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.rateBtn}
                 onPress={() => navigation.navigate('Review', { productId: product.id })}
               >
@@ -182,7 +194,7 @@ export default function ProductScreen({ route, navigation }) {
                 </View>
                 <View style={styles.verifiedBadge}><Text style={styles.verifiedText}>Verified purchase</Text></View>
                 <Text style={[styles.reviewText, isDark && styles.textDim]}>{rev.comment}</Text>
-                
+
                 {rev.photos && rev.photos.length > 0 && (
                   <View style={styles.reviewPhotosRow}>
                     {rev.photos.map((p, idx) => (
@@ -208,7 +220,7 @@ export default function ProductScreen({ route, navigation }) {
                   <View style={styles.reviewerRow}>
                     <View style={styles.reviewerAvatar}><Text style={styles.avatarTxt}>RS</Text></View>
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.reviewerName, isDark && styles.textLight]}>Riya S.</Text>
+                      <Text style={[styles.reviewerName, isDark && styles.textLight]}>Renu S.</Text>
                       <Text style={styles.reviewDate}>12 Apr 2026</Text>
                     </View>
                     <View style={styles.reviewerStars}>
@@ -225,7 +237,7 @@ export default function ProductScreen({ route, navigation }) {
                   <View style={styles.reviewerRow}>
                     <View style={[styles.reviewerAvatar, { backgroundColor: '#fce4ec' }]}><Text style={[styles.avatarTxt, { color: '#c2185b' }]}>AK</Text></View>
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.reviewerName, isDark && styles.textLight]}>Arjun K.</Text>
+                      <Text style={[styles.reviewerName, isDark && styles.textLight]}>Aman K.</Text>
                       <Text style={styles.reviewDate}>8 Apr 2026</Text>
                     </View>
                     <View style={styles.reviewerStars}>
@@ -244,7 +256,7 @@ export default function ProductScreen({ route, navigation }) {
         </View>
       </ScrollView>
 
-      <View style={[styles.bottomBar, isDark && styles.bgDark]}>
+      <View style={[styles.bottomBar, isDark && styles.bgDark, { paddingBottom: Math.max(30, insets.bottom + 10) }]}>
         <View style={styles.footerPrice}>
           <Text style={[styles.footerPriceText, isDark && styles.textLight]}>₹{product.price}</Text>
           <Text style={styles.footerViewDetails}>VIEW DETAILS</Text>
@@ -257,7 +269,7 @@ export default function ProductScreen({ route, navigation }) {
           <Text style={styles.addToCartBtnText}>{isOutOfStock ? 'OUT OF STOCK' : 'Add to Cart →'}</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -292,11 +304,14 @@ const styles = StyleSheet.create({
     width: '90%',
     height: '100%',
   },
-  imageActions: {
+  headerActions: {
     position: 'absolute',
-    top: 20,
+    left: 20,
     right: 20,
-    gap: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 10,
   },
   imgActionBtn: {
     width: 40,

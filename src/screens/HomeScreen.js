@@ -1,19 +1,29 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, TextInput, ScrollView, Dimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, TextInput, ScrollView, Dimensions, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useAppContext } from '../context/AppContext';
 
 const { width } = Dimensions.get('window');
 
+/**
+ * HomeScreen: The primary landing page of the application.
+ * Features a dynamic header with location, search functionality, 
+ * category browsing, promotional banners, and various product grids.
+ */
 export default function HomeScreen({ navigation }) {
-  const { stock, isEssentialMode, currentUser, addToCart, theme } = useAppContext();
+  const insets = useSafeAreaInsets();
+  
+  // Destructure necessary state and actions from AppContext
+  const { stock, isEssentialMode, currentUser, addToCart, theme, notification, setNotification } = useAppContext();
 
   const isDark = theme === 'dark';
 
+  // Local state for search functionality
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
 
+  // Static category definitions
   const categories = [
     { id: '1', name: 'Vegetables', icon: '🥦' },
     { id: '2', name: 'Dairy & Bread', icon: '🥛' },
@@ -25,6 +35,10 @@ export default function HomeScreen({ navigation }) {
     { id: '8', name: 'Personal Care', icon: '🧴' },
   ];
 
+  /**
+   * Handles adding an item to the cart.
+   * Redirects to Login if the user is not authenticated.
+   */
   const handleAddToCart = (product) => {
     if (!currentUser) {
       navigation.navigate('Login');
@@ -33,6 +47,10 @@ export default function HomeScreen({ navigation }) {
     addToCart(product);
   };
 
+  /**
+   * Reusable component to render an individual product card.
+   * Handles Out of Stock (OOC) visual states.
+   */
   const renderProduct = ({ item, isHorizontal }) => {
     const liveStock = stock.find(s => s.id === item.id);
     const isOutOfStock = !liveStock || liveStock.stock <= 0;
@@ -76,12 +94,13 @@ export default function HomeScreen({ navigation }) {
     );
   };
 
+  // Calculate total items in cart for the floating button
   const cartCount = currentUser ? currentUser.cart.reduce((sum, item) => sum + item.cartQuantity, 0) : 0;
 
-  // Best Sellers (first 9 items)
+  // Best Sellers: Top 9 items from stock
   const bestSellers = stock.slice(0, 9);
 
-  // Buy Again & Review items
+  // Filter delivered orders to populate "Buy Again" and "Review" sections
   const deliveredOrders = currentUser?.orders?.filter(o => o.status === 'Delivered') || [];
   let pastItems = [];
   deliveredOrders.forEach(order => {
@@ -92,17 +111,18 @@ export default function HomeScreen({ navigation }) {
     });
   });
 
+  // Dynamic search results filtering
   const searchResults = searchQuery.trim().length > 0
     ? stock.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5)
     : [];
 
   return (
     <View style={[styles.container, isDark && styles.containerDark]}>
-      <StatusBar style="dark" backgroundColor="#F8CB46" translucent={false} />
-      <SafeAreaView edges={['top']} style={{ backgroundColor: '#F8CB46' }} />
+      <StatusBar style={isDark ? "light" : "dark"} translucent backgroundColor="transparent" />
+
       <View style={{ flex: 1, backgroundColor: isDark ? '#121212' : '#fff' }}>
-        {/* Header */}
-        <View style={styles.header}>
+        {/* Persistent Yellow Header Section */}
+        <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
           <View style={styles.locationRow}>
             <View style={{ flex: 1 }}>
               <Text style={styles.deliveryTitle}>Delivery in 8 minutes</Text>
@@ -111,12 +131,14 @@ export default function HomeScreen({ navigation }) {
               </Text>
             </View>
             <View style={styles.headerButtons}>
+              {/* Tracking/Orders Navigation */}
               <TouchableOpacity
                 style={styles.ordersBtn}
                 onPress={() => navigation.navigate(currentUser ? 'Tracking' : 'Login')}
               >
                 <Text style={styles.ordersBtnText}>📦</Text>
               </TouchableOpacity>
+              {/* Profile/Login Navigation */}
               <TouchableOpacity
                 style={styles.profileBtn}
                 onPress={() => navigation.navigate(currentUser ? 'Profile' : 'Login')}
@@ -127,60 +149,72 @@ export default function HomeScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           </View>
-          <View style={styles.searchBar}>
-            <Text style={styles.searchIcon}>🔍</Text>
-            <TextInput
-              placeholder="Search 'milk'"
-              style={styles.searchInput}
-              placeholderTextColor="#999"
-              value={searchQuery}
-              onChangeText={text => {
-                setSearchQuery(text);
-                setShowSearch(text.length > 0);
-              }}
-              onFocus={() => setShowSearch(searchQuery.length > 0)}
-            />
-          </View>
-
-          {showSearch && searchResults.length > 0 && (
-            <View style={styles.searchResultsContainer}>
-              <ScrollView showsVerticalScrollIndicator={true} style={{ maxHeight: 250 }}>
-                {searchResults.map(item => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={styles.searchResultItem}
-                    onPress={() => {
-                      setSearchQuery('');
-                      setShowSearch(false);
-                      navigation.navigate('Product', { productId: item.id });
-                    }}
-                  >
-                    <Image source={{ uri: item.image }} style={styles.searchResultImage} resizeMode="contain" />
-                    <View>
-                      <Text style={styles.searchResultName}>{item.name}</Text>
-                      <Text style={styles.searchResultPrice}>₹{item.price}</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-                {searchQuery.length > 0 && (
-                  <TouchableOpacity
-                    style={styles.moreResultsBtn}
-                    onPress={() => {
-                      navigation.navigate('AllItems', { searchQuery });
-                      setSearchQuery('');
-                      setShowSearch(false);
-                    }}
-                  >
-                    <Text style={styles.moreResultsText}>See more results for "{searchQuery}"</Text>
-                  </TouchableOpacity>
-                )}
-              </ScrollView>
+          
+          {/* Search Input and Live Results Dropdown */}
+          <View style={styles.searchWrapper}>
+            <View style={styles.searchBar}>
+              <Text style={styles.searchIcon}>🔍</Text>
+              <TextInput
+                placeholder="Search 'milk'"
+                style={styles.searchInput}
+                placeholderTextColor="#999"
+                value={searchQuery}
+                onChangeText={text => {
+                  setSearchQuery(text);
+                  setShowSearch(text.length > 0);
+                }}
+                onFocus={() => setShowSearch(searchQuery.length > 0)}
+              />
             </View>
-          )}
+
+            {showSearch && searchResults.length > 0 && (
+              <View style={[styles.searchResultsContainer, isDark && styles.cardDark]}>
+                <ScrollView
+                  showsVerticalScrollIndicator={true}
+                  style={{ maxHeight: 250 }}
+                  nestedScrollEnabled={true}
+                  keyboardShouldPersistTaps="handled"
+                >
+                  {searchResults.map(item => (
+                    <TouchableOpacity
+                      key={item.id}
+                      style={[styles.searchResultItem, isDark && { borderBottomColor: '#333' }]}
+                      onPress={() => {
+                        setSearchQuery('');
+                        setShowSearch(false);
+                        navigation.navigate('Product', { productId: item.id });
+                      }}
+                    >
+                      <Image source={{ uri: item.image }} style={styles.searchResultImage} resizeMode="contain" />
+                      <View>
+                        <Text style={[styles.searchResultName, isDark && styles.textLight]}>{item.name}</Text>
+                        <Text style={styles.searchResultPrice}>₹{item.price}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                  {searchQuery.length > 0 && (
+                    <TouchableOpacity
+                      style={styles.moreResultsBtn}
+                      onPress={() => {
+                        navigation.navigate('AllItems', { searchQuery });
+                        setSearchQuery('');
+                        setShowSearch(false);
+                      }}
+                    >
+                      <Text style={styles.moreResultsText}>See more results for "{searchQuery}"</Text>
+                    </TouchableOpacity>
+                  )}
+                </ScrollView>
+              </View>
+            )}
+          </View>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-          {/* Shop by Categories (Horizontal Scroll) */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: Math.max(100, insets.bottom + 80) }}
+        >
+          {/* Category Quick Links */}
           <View style={styles.sectionContainer}>
             <Text style={[styles.sectionTitle, isDark && styles.textLight]}>Shop by Category</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -198,7 +232,8 @@ export default function HomeScreen({ navigation }) {
               ))}
             </ScrollView>
           </View>
-          {/* Banner */}
+
+          {/* Promotional Banner (Hidden in Essential Mode) */}
           {!isEssentialMode && (
             <View style={styles.bannerContainer}>
               <View style={styles.bannerCard}>
@@ -217,11 +252,11 @@ export default function HomeScreen({ navigation }) {
             </View>
           )}
 
-          {/* 3x3 Best Sellers Grid */}
+          {/* Bestsellers Grid (3x3 Layout) */}
           <View style={styles.sectionContainer}>
             <Text style={[styles.sectionTitle, isDark && styles.textLight]}>🔥 Bestsellers</Text>
 
-            {/* Scrollable Categories in Best Sellers */}
+            {/* Category Filter Pills for Bestsellers */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.bsCategories}>
               {categories.map(cat => (
                 <TouchableOpacity
@@ -251,7 +286,7 @@ export default function HomeScreen({ navigation }) {
             </TouchableOpacity>
           </View>
 
-          {/* Buy Again Section */}
+          {/* Personalized "Buy Again" Section */}
           {pastItems.length > 0 && (
             <View style={styles.sectionContainer}>
               <Text style={[styles.sectionTitle, isDark && styles.textLight]}>Buy Again</Text>
@@ -265,7 +300,7 @@ export default function HomeScreen({ navigation }) {
             </View>
           )}
 
-          {/* Review Items Section */}
+          {/* Personalized "Review" Section */}
           {pastItems.length > 0 && (
             <View style={styles.sectionContainer}>
               <Text style={[styles.sectionTitle, isDark && styles.textLight]}>Review your past purchases</Text>
@@ -286,10 +321,10 @@ export default function HomeScreen({ navigation }) {
           )}
         </ScrollView>
 
-        {/* Floating Cart Button */}
+        {/* Sticky Floating Checkout Bar */}
         {currentUser && cartCount > 0 && (
           <TouchableOpacity
-            style={styles.floatingCart}
+            style={[styles.floatingCart, { bottom: Math.max(20, insets.bottom + 10) }]}
             onPress={() => navigation.navigate('Cart')}
             activeOpacity={0.9}
           >
@@ -321,8 +356,13 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#F8CB46',
     paddingHorizontal: 15,
-    paddingVertical: 22,
-    // paddingBottom: 15,
+    paddingBottom: 15,
+    zIndex: 1000,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   locationRow: {
     flexDirection: 'row',
@@ -399,19 +439,26 @@ const styles = StyleSheet.create({
     color: '#000',
     fontWeight: '500',
   },
+  searchWrapper: {
+    zIndex: 2000,
+    elevation: 20,
+    position: 'relative',
+  },
   searchResultsContainer: {
     position: 'absolute',
-    top: 105,
-    left: 15,
-    right: 15,
+    top: 52, 
+    left: 0,
+    right: 0,
     backgroundColor: '#fff',
     borderRadius: 16,
-    zIndex: 1000,
-    elevation: 10,
+    zIndex: 3000,
+    elevation: 25,
     shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
+    shadowOpacity: 0.2,
+    shadowRadius: 15,
     padding: 8,
+    borderWidth: Platform.OS === 'android' ? 0.5 : 0,
+    borderColor: '#eee',
   },
   searchResultItem: {
     flexDirection: 'row',
@@ -621,7 +668,6 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     justifyContent: 'center',
     width: '100%',
-    resizeMode: 'cover',
   },
   productImage: {
     width: '100%',
@@ -674,7 +720,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: 30,
     marginLeft: 'auto',
-
   },
   addButtonText: {
     color: '#000000',
@@ -738,5 +783,40 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 15,
+  },
+  toast: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    backgroundColor: '#333',
+    borderRadius: 12,
+    padding: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    zIndex: 9999,
+    elevation: 100,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+  },
+  toastContent: {
+    flex: 1,
+    marginRight: 10,
+  },
+  toastTitle: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  toastMessage: {
+    color: '#ccc',
+    fontSize: 12,
+  },
+  toastClose: {
+    color: '#fff',
+    fontSize: 18,
+    paddingLeft: 10,
   }
 });
