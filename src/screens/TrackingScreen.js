@@ -148,7 +148,7 @@ export default function TrackingScreen({ navigation }) {
             {!selectedOrder.delivered && (
               <View style={[styles.mapContainer, isDark && styles.cardDark]}>
                 <Image 
-                  source={require('../../assets/map.png')} 
+                  source={require('../../assets/map.jpg')} 
                   style={styles.mapBg} 
                   resizeMode="cover"
                 />
